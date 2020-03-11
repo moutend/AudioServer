@@ -1,3 +1,4 @@
+#include <shlwapi.h>
 #include <windows.h>
 
 #include "AudioServer.h"
