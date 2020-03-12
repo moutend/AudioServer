@@ -2,7 +2,7 @@
 #include <windows.h>
 
 #include "AudioServer.h"
-#include "AudioServer/IAudioServer.h"
+#include <AudioServer/IAudioServer.h>
 
 const TCHAR ProgIDStr[] = TEXT("Sample.AudioServer");
 LONG LockCount{};
