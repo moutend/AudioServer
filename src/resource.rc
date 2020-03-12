@@ -1,3 +1,3 @@
 #ifndef APSTUDIO_INVOKED
-1 typelib IAudioServer.tlb
+1 typelib ..\lib\IAudioServer\release\src\IAudioServer.tlb
 #endif
