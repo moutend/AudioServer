@@ -28,4 +28,4 @@ add_compile_options("/ZW")
 
 file(GLOB SOURCES "./src/*")
 add_library(AudioServer SHARED ${SOURCES})
-target_link_libraries(AudioServer IAudioServer cpplogger cppaudio avrt.lib mmdevapi.lib cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal cpprestsdk::cpprestsdk_brotli_internal OleAut32.lib)
+target_link_libraries(AudioServer IAudioServer cpplogger cppaudio avrt.lib mmdevapi.lib cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal cpprestsdk::cpprestsdk_brotli_internal OleAut32.lib shlwapi.lib)
