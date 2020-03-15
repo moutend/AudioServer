@@ -527,17 +527,128 @@ END_LOGLOOP_CLEANUP:
   return S_OK;
 }
 
-STDMETHODIMP CAudioServer::FadeIn() { return E_NOTIMPL; }
+STDMETHODIMP CAudioServer::FadeIn() {
+  std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
-STDMETHODIMP CAudioServer::FadeOut() { return E_NOTIMPL; }
+  if (!mIsActive) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Called FadeIn()", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceEngine->FadeIn();
+  mSFXEngine->FadeIn();
+
+  return S_OK;
+}
+
+STDMETHODIMP CAudioServer::FadeOut() {
+  std::lock_guard<std::mutex> lock(mAudioServerMutex);
+
+  if (!mIsActive) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Called FadeOut()", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceEngine->FadeOut();
+  mSFXEngine->FadeOut();
+
+  return S_OK;
+}
 
 STDMETHODIMP CAudioServer::Push(RawCommand **pAudioCommands,
                                 INT32 numAudioCommands) {
-  return E_NOTIMPL;
+  std::lock_guard<std::mutex> lock(mAudioServerMutex);
+
+  if (!mIsActive) {
+    return E_FAIL;
+  }
+  if (commandsPtr == nullptr || commandsLength <= 0) {
+    return E_FAIL;
+  }
+
+  wchar_t *msg = new wchar_t[256]{};
+
+  HRESULT hr = StringCbPrintfW(
+      msg, 255, L"Called Push Read=%d,Write=%d,IsForce=%d",
+      mCommandLoopCtx->ReadIndex, mCommandLoopCtx->WriteIndex, isForcePush);
+
+  if (FAILED(hr)) {
+    return E_FAIL;
+  }
+
+  Log->Info(msg, GetCurrentThreadId(), __LONGFILE__);
+
+  delete[] msg;
+  msg = nullptr;
+
+  bool isIdle = mCommandLoopCtx->IsIdle;
+  int32_t base = mCommandLoopCtx->WriteIndex;
+  size_t textLen{};
+
+  for (int32_t i = 0; i < commandsLength; i++) {
+    int32_t offset = (base + i) % mCommandLoopCtx->MaxCommands;
+
+    mCommandLoopCtx->Commands[offset]->Type = commandsPtr[i]->Type;
+
+    switch (commandsPtr[i]->Type) {
+    case 1:
+      mCommandLoopCtx->Commands[offset]->SFXIndex =
+          commandsPtr[i]->SFXIndex <= 0 ? 0 : commandsPtr[i]->SFXIndex - 1;
+      break;
+    case 2:
+      mCommandLoopCtx->Commands[offset]->WaitDuration =
+          commandsPtr[i]->WaitDuration;
+      break;
+    case 3: // Generate voice from plain text
+    case 4: // Generate voice from SSML
+      delete[] mCommandLoopCtx->Commands[offset]->Text;
+      mCommandLoopCtx->Commands[offset]->Text = nullptr;
+
+      textLen = std::wcslen(commandsPtr[i]->Text);
+      mCommandLoopCtx->Commands[offset]->Text = new wchar_t[textLen + 1]{};
+      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text,
+                   commandsPtr[i]->Text, textLen);
+
+      break;
+    default:
+      // do nothing
+      continue;
+    }
+
+    mCommandLoopCtx->WriteIndex =
+        (mCommandLoopCtx->WriteIndex + 1) % mCommandLoopCtx->MaxCommands;
+  }
+  if (isForcePush) {
+    mCommandLoopCtx->ReadIndex = base;
+  }
+  if (!isForcePush && !isIdle) {
+    return S_OK;
+  }
+  if (!SetEvent(mCommandLoopCtx->PushEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mCommandLoopCtx->IsIdle = false;
+
+  return S_OK;
 }
 
 STDMETHODIMP CAudioServer::GetVoiceCount(INT32 *pVoiceCount) {
-  return E_NOTIMPL;
+  if (pVoiceCount == nullptr) {
+    return E_FAIL;
+  }
+  if (mVoiceInfoCtx == nullptr) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Called GetVoiceCount()", GetCurrentThreadId(), __LONGFILE__);
+
+  *pVoiceCount = mVoiceInfoCtx->Count;
+
+  return S_OK;
 }
 
 STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceCount) {
