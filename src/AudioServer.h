@@ -75,7 +75,7 @@ private:
   HANDLE mNextSoundEvent = nullptr;
 
   PCMAudio::RingEngine *mVoiceEngine = nullptr;
-  PCMAudio::LauncherEngine *mFSXEngine = nullptr;
+  PCMAudio::LauncherEngine *mSFXEngine = nullptr;
 };
 
 class CAudioServerFactory : public IClassFactory {

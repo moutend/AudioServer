@@ -206,7 +206,7 @@ STDMETHODIMP CAudioServer::Start() {
   mVoiceRenderCtx->QuitEvent =
       CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
 
-  if (voiceRenderCtx->QuitEvent == nullptr) {
+  if (mVoiceRenderCtx->QuitEvent == nullptr) {
     Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
     return E_FAIL;
   }
