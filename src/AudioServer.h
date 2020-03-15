@@ -35,7 +35,8 @@ public:
   STDMETHODIMP Stop();
   STDMETHODIMP FadeIn();
   STDMETHODIMP FadeOut();
-  STDMETHODIMP Push(RawCommand **pRawCommands, INT32 numAudioCommands);
+  STDMETHODIMP Push(RawCommand **pCommands, INT32 commandsLength,
+                    INT32 isForcePush);
   STDMETHODIMP GetVoiceCount(INT32 *pVoiceCount);
   STDMETHODIMP GetDefaultVoice(INT32 *pVoiceIndex);
   STDMETHODIMP GetVoiceProperty(INT32 voiceIndex,

@@ -557,14 +557,11 @@ STDMETHODIMP CAudioServer::FadeOut() {
   return S_OK;
 }
 
-STDMETHODIMP CAudioServer::Push(RawCommand **pAudioCommands,
-                                INT32 numAudioCommands) {
+STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
+                                INT32 isForcePush) {
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
-  if (!mIsActive) {
-    return E_FAIL;
-  }
-  if (commandsPtr == nullptr || commandsLength <= 0) {
+  if (!mIsActive || pCommands == nullptr || commandsLength <= 0) {
     return E_FAIL;
   }
 
@@ -590,26 +587,26 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pAudioCommands,
   for (int32_t i = 0; i < commandsLength; i++) {
     int32_t offset = (base + i) % mCommandLoopCtx->MaxCommands;
 
-    mCommandLoopCtx->Commands[offset]->Type = commandsPtr[i]->Type;
+    mCommandLoopCtx->Commands[offset]->Type = pCommands[i]->Type;
 
-    switch (commandsPtr[i]->Type) {
+    switch (pCommands[i]->Type) {
     case 1:
       mCommandLoopCtx->Commands[offset]->SFXIndex =
-          commandsPtr[i]->SFXIndex <= 0 ? 0 : commandsPtr[i]->SFXIndex - 1;
+          pCommands[i]->SFXIndex <= 0 ? 0 : pCommands[i]->SFXIndex - 1;
       break;
     case 2:
       mCommandLoopCtx->Commands[offset]->WaitDuration =
-          commandsPtr[i]->WaitDuration;
+          pCommands[i]->WaitDuration;
       break;
     case 3: // Generate voice from plain text
     case 4: // Generate voice from SSML
       delete[] mCommandLoopCtx->Commands[offset]->Text;
       mCommandLoopCtx->Commands[offset]->Text = nullptr;
 
-      textLen = std::wcslen(commandsPtr[i]->Text);
+      textLen = std::wcslen(pCommands[i]->Text);
       mCommandLoopCtx->Commands[offset]->Text = new wchar_t[textLen + 1]{};
-      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text,
-                   commandsPtr[i]->Text, textLen);
+      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text, pCommands[i]->Text,
+                   textLen);
 
       break;
     default:
