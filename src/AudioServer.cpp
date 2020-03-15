@@ -531,7 +531,7 @@ STDMETHODIMP CAudioServer::FadeIn() { return E_NOTIMPL; }
 
 STDMETHODIMP CAudioServer::FadeOut() { return E_NOTIMPL; }
 
-STDMETHODIMP CAudioServer::Push(AudioCommand **pAudioCommands,
+STDMETHODIMP CAudioServer::Push(RawCommand **pAudioCommands,
                                 INT32 numAudioCommands) {
   return E_NOTIMPL;
 }
@@ -544,8 +544,9 @@ STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceCount) {
   return E_NOTIMPL;
 }
 
-STDMETHODIMP CAudioServer::GetVoiceProperty(INT32 voiceIndex,
-                                            VoiceProperty **pVoiceProperty) {
+STDMETHODIMP
+CAudioServer::GetVoiceProperty(INT32 voiceIndex,
+                               RawVoiceProperty **pRawVoiceProperty) {
   return E_NOTIMPL;
 }
 
@@ -553,8 +554,9 @@ STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 voiceIndex) {
   return E_NOTIMPL;
 }
 
-STDMETHODIMP CAudioServer::SetVoiceProperty(INT32 voiceIndex,
-                                            VoiceProperty *pVoiceProperty) {
+STDMETHODIMP
+CAudioServer::SetVoiceProperty(INT32 voiceIndex,
+                               RawVoiceProperty *pRawVoiceProperty) {
   return E_NOTIMPL;
 }
 

@@ -35,14 +35,14 @@ public:
   STDMETHODIMP Stop();
   STDMETHODIMP FadeIn();
   STDMETHODIMP FadeOut();
-  STDMETHODIMP Push(AudioCommand **pAudioCommands, INT32 numAudioCommands);
+  STDMETHODIMP Push(RawCommand **pRawCommands, INT32 numAudioCommands);
   STDMETHODIMP GetVoiceCount(INT32 *pVoiceCount);
   STDMETHODIMP GetDefaultVoice(INT32 *pVoiceIndex);
   STDMETHODIMP GetVoiceProperty(INT32 voiceIndex,
-                                VoiceProperty **pVoiceProperty);
+                                RawVoiceProperty **pRawVoiceProperty);
   STDMETHODIMP SetDefaultVoice(INT32 voiceIndex);
   STDMETHODIMP SetVoiceProperty(INT32 voiceIndex,
-                                VoiceProperty *pVoiceProperty);
+                                RawVoiceProperty *pRawVoiceProperty);
 
   CAudioServer();
   ~CAudioServer();
