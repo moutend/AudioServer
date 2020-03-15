@@ -1,8 +1,16 @@
+#include <cpplogger/cpplogger.h>
+#include <cstring>
+#include <fstream>
+#include <mutex>
 #include <shlwapi.h>
 #include <windows.h>
 
+#include <strsafe.h>
+
 #include "AudioServer.h"
 #include <AudioServer/IAudioServer.h>
+
+extern Logger::Logger *Log;
 
 const TCHAR ProgIDStr[] = TEXT("Sample.AudioServer");
 LONG LockCount{};
@@ -98,9 +106,426 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
                            pExcepInfo, puArgErr);
 }
 
-STDMETHODIMP CAudioServer::Start() { return E_NOTIMPL; }
+STDMETHODIMP CAudioServer::Start() {
+  std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
-STDMETHODIMP CAudioServer::Stop() { return E_NOTIMPL; }
+  if (mIsActive) {
+    Log->Warn(L"Already initialized", GetCurrentThreadId(), __LONGFILE__);
+    return S_OK;
+  }
+
+  mIsActive = true;
+
+  Log = new Logger::Logger(L"AudioServer", L"v0.1.0-develop", 4096);
+
+  Log->Info(L"Setup audio server", GetCurrentThreadId(), __LONGFILE__);
+
+  mLogLoopCtx = new LogLoopContext();
+
+  mLogLoopCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mLogLoopCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Create log loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mLogLoopThread = CreateThread(nullptr, 0, logLoop,
+                                static_cast<void *>(mLogLoopCtx), 0, nullptr);
+
+  if (mLogLoopThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mVoiceInfoCtx = new VoiceInfoContext();
+
+  Log->Info(L"Create voice info loop thread", GetCurrentThreadId(),
+            __LONGFILE__);
+
+  mVoiceInfoThread = CreateThread(
+      nullptr, 0, voiceInfo, static_cast<void *>(mVoiceInfoCtx), 0, nullptr);
+
+  if (mVoiceInfoThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mVoiceInfoThread, INFINITE);
+  SafeCloseHandle(&mVoiceInfoThread);
+
+  Log->Info(L"Delete voice info thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceEngine = new PCMAudio::RingEngine();
+
+  mNextVoiceEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mNextVoiceEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mVoiceLoopCtx = new VoiceLoopContext();
+  mVoiceLoopCtx->NextEvent = mNextVoiceEvent;
+  mVoiceLoopCtx->VoiceEngine = mVoiceEngine;
+  mVoiceLoopCtx->VoiceInfoCtx = mVoiceInfoCtx;
+
+  mVoiceLoopCtx->FeedEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mVoiceLoopCtx->FeedEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mVoiceLoopCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mVoiceLoopCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Create voice loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceLoopThread = CreateThread(
+      nullptr, 0, voiceLoop, static_cast<void *>(mVoiceLoopCtx), 0, nullptr);
+
+  if (mVoiceLoopThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mVoiceRenderCtx = new AudioLoopContext();
+  mVoiceRenderCtx->NextEvent = mNextVoiceEvent;
+  mVoiceRenderCtx->Engine = mVoiceEngine;
+
+  mVoiceRenderCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (voiceRenderCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Create voice render thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceRenderThread = CreateThread(
+      nullptr, 0, audioLoop, static_cast<void *>(mVoiceRenderCtx), 0, nullptr);
+
+  if (mVoiceRenderThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mSFXEngine = new PCMAudio::LauncherEngine(mMaxWaves);
+
+  for (int16_t i = 0; i < mMaxWaves; i++) {
+    wchar_t *filePath = new wchar_t[256]{};
+
+    HRESULT hr = StringCbPrintfW(filePath, 255, L"waves\\%03d.wav", i + 1);
+
+    if (FAILED(hr)) {
+      Log->Fail(L"Failed to build file path", GetCurrentThreadId(),
+                __LONGFILE__);
+      continue;
+    }
+
+    std::ifstream file(filePath, std::ios::binary | std::ios::in);
+
+    if (!mSFXEngine->Register(i, file)) {
+      Log->Fail(L"Failed to register SFX", GetCurrentThreadId(), __LONGFILE__);
+      continue;
+    }
+
+    Log->Info(filePath, GetCurrentThreadId(), __LONGFILE__);
+
+    delete[] filePath;
+    filePath = nullptr;
+
+    file.close();
+  }
+
+  mNextSoundEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mNextSoundEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mSFXLoopCtx = new SFXLoopContext();
+  mSFXLoopCtx->NextEvent = mNextSoundEvent;
+  mSFXLoopCtx->SFXEngine = mSFXEngine;
+
+  mSFXLoopCtx->FeedEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mSFXLoopCtx->FeedEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mSFXLoopCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mSFXLoopCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Create sfx loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mSFXLoopThread = CreateThread(nullptr, 0, sfxLoop,
+                                static_cast<void *>(mSFXLoopCtx), 0, nullptr);
+
+  if (mSFXLoopThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mSFXRenderCtx = new AudioLoopContext();
+  mSFXRenderCtx->NextEvent = mNextSoundEvent;
+  mSFXRenderCtx->Engine = mSFXEngine;
+
+  mSFXRenderCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mSFXRenderCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Create SFX render thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mSFXRenderThread = CreateThread(
+      nullptr, 0, audioLoop, static_cast<void *>(mSFXRenderCtx), 0, nullptr);
+
+  if (mSFXRenderThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mCommandLoopCtx = new CommandLoopContext();
+
+  mCommandLoopCtx->PushEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mCommandLoopCtx->PushEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mCommandLoopCtx->QuitEvent =
+      CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
+  if (mCommandLoopCtx->QuitEvent == nullptr) {
+    Log->Fail(L"Failed to create event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  mCommandLoopCtx->VoiceLoopCtx = mVoiceLoopCtx;
+  mCommandLoopCtx->SFXLoopCtx = mSFXLoopCtx;
+  mCommandLoopCtx->Commands = new Command *[mCommandLoopCtx->MaxCommands] {};
+
+  for (int32_t i = 0; i < mCommandLoopCtx->MaxCommands; i++) {
+    mCommandLoopCtx->Commands[i] = new Command;
+    mCommandLoopCtx->Commands[i]->Type = 0;
+    mCommandLoopCtx->Commands[i]->SFXIndex = 0;
+    mCommandLoopCtx->Commands[i]->WaitDuration = 0;
+    mCommandLoopCtx->Commands[i]->Text = nullptr;
+  }
+
+  Log->Info(L"Create command loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+  mCommandLoopThread =
+      CreateThread(nullptr, 0, commandLoop,
+                   static_cast<void *>(mCommandLoopCtx), 0, nullptr);
+
+  if (mCommandLoopThread == nullptr) {
+    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  Log->Info(L"Complete setup AudioNode", GetCurrentThreadId(), __LONGFILE__);
+
+  return S_OK;
+}
+
+STDMETHODIMP CAudioServer::Stop() {
+  std::lock_guard<std::mutex> lock(mAudioServerMutex);
+
+  if (!mIsActive) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Stop audio server", GetCurrentThreadId(), __LONGFILE__);
+
+  if (mCommandLoopThread == nullptr) {
+    goto END_COMMANDLOOP_CLEANUP;
+  }
+  if (!SetEvent(mCommandLoopCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mCommandLoopThread, INFINITE);
+  SafeCloseHandle(&mCommandLoopThread);
+
+  for (int32_t i = 0; i < mCommandLoopCtx->MaxCommands; i++) {
+    delete[] mCommandLoopCtx->Commands[i]->Text;
+    mCommandLoopCtx->Commands[i]->Text = nullptr;
+
+    delete mCommandLoopCtx->Commands[i];
+    mCommandLoopCtx->Commands[i] = nullptr;
+  }
+
+  SafeCloseHandle(&(mCommandLoopCtx->PushEvent));
+  SafeCloseHandle(&(mCommandLoopCtx->QuitEvent));
+
+  delete mCommandLoopCtx;
+  mCommandLoopCtx = nullptr;
+
+  Log->Info(L"Delete command loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+END_COMMANDLOOP_CLEANUP:
+
+  if (mVoiceLoopThread == nullptr) {
+    goto END_VOICELOOP_CLEANUP;
+  }
+  if (!SetEvent(mVoiceLoopCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mVoiceLoopThread, INFINITE);
+  SafeCloseHandle(&mVoiceLoopThread);
+
+  SafeCloseHandle(&(mVoiceLoopCtx->QuitEvent));
+  SafeCloseHandle(&(mVoiceLoopCtx->NextEvent));
+  SafeCloseHandle(&(mVoiceLoopCtx->FeedEvent));
+
+  for (unsigned int i = 0; i < mVoiceInfoCtx->Count; i++) {
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->Id;
+    mVoiceInfoCtx->VoiceProperties[i]->Id = nullptr;
+
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->DisplayName;
+    mVoiceInfoCtx->VoiceProperties[i]->DisplayName = nullptr;
+
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->Language;
+    mVoiceInfoCtx->VoiceProperties[i]->Language = nullptr;
+  }
+
+  delete[] mVoiceInfoCtx->VoiceProperties;
+  mVoiceInfoCtx->VoiceProperties = nullptr;
+
+  delete mVoiceInfoCtx;
+  mVoiceInfoCtx = nullptr;
+
+  delete mVoiceLoopCtx;
+  mVoiceLoopCtx = nullptr;
+
+  Log->Info(L"Delete voice loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+END_VOICELOOP_CLEANUP:
+
+  if (mVoiceRenderThread == nullptr) {
+    goto END_VOICERENDER_CLEANUP;
+  }
+  if (!SetEvent(mVoiceRenderCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mVoiceRenderThread, INFINITE);
+  SafeCloseHandle(&mVoiceRenderThread);
+
+  SafeCloseHandle(&(mVoiceRenderCtx->NextEvent));
+  SafeCloseHandle(&(mVoiceRenderCtx->QuitEvent));
+
+  delete mVoiceRenderCtx;
+  mVoiceRenderCtx = nullptr;
+
+  delete mVoiceEngine;
+  mVoiceEngine = nullptr;
+
+  Log->Info(L"Delete voice render thread", GetCurrentThreadId(), __LONGFILE__);
+
+END_VOICERENDER_CLEANUP:
+
+  if (mSFXLoopThread == nullptr) {
+    goto END_SFXLOOP_CLEANUP;
+  }
+  if (!SetEvent(mSFXLoopCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mSFXLoopThread, INFINITE);
+  SafeCloseHandle(&mSFXLoopThread);
+
+  SafeCloseHandle(&(mSFXLoopCtx->FeedEvent));
+  SafeCloseHandle(&(mSFXLoopCtx->NextEvent));
+  SafeCloseHandle(&(mSFXLoopCtx->QuitEvent));
+
+  delete mSFXLoopCtx;
+  mSFXLoopCtx = nullptr;
+
+  Log->Info(L"Delete SFX loop thread", GetCurrentThreadId(), __LONGFILE__);
+
+END_SFXLOOP_CLEANUP:
+
+  if (mSFXRenderThread == nullptr) {
+    goto END_SFXRENDER_CLEANUP;
+  }
+  if (!SetEvent(mSFXRenderCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mSFXRenderThread, INFINITE);
+  SafeCloseHandle(&mSFXRenderThread);
+
+  SafeCloseHandle(&(mSFXRenderCtx->NextEvent));
+  SafeCloseHandle(&(mSFXRenderCtx->QuitEvent));
+
+  delete mSFXEngine;
+  mSFXEngine = nullptr;
+
+  Log->Info(L"Delete SFX render thread", GetCurrentThreadId(), __LONGFILE__);
+
+END_SFXRENDER_CLEANUP:
+
+  SafeCloseHandle(&mNextVoiceEvent);
+  SafeCloseHandle(&mNextSoundEvent);
+
+  Log->Info(L"Complete Stop audio server", GetCurrentThreadId(), __LONGFILE__);
+
+  if (mLogLoopThread == nullptr) {
+    goto END_LOGLOOP_CLEANUP;
+  }
+  if (!SetEvent(mLogLoopCtx->QuitEvent)) {
+    Log->Fail(L"Failed to send event", GetCurrentThreadId(), __LONGFILE__);
+    return E_FAIL;
+  }
+
+  WaitForSingleObject(mLogLoopThread, INFINITE);
+  SafeCloseHandle(&mLogLoopThread);
+
+  SafeCloseHandle(&(mLogLoopCtx->QuitEvent));
+
+  delete mLogLoopCtx;
+  mLogLoopCtx = nullptr;
+
+END_LOGLOOP_CLEANUP:
+
+  mIsActive = false;
+
+  return S_OK;
+}
 
 STDMETHODIMP CAudioServer::FadeIn() { return E_NOTIMPL; }
 

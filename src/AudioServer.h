@@ -1,7 +1,18 @@
 #pragma once
 
-#include <windows.h>
 #include <AudioServer/IAudioServer.h>
+#include <cppaudio/engine.h>
+#include <mutex>
+#include <windows.h>
+
+#include "audioloop.h"
+#include "commandloop.h"
+#include "context.h"
+#include "logloop.h"
+#include "sfxloop.h"
+#include "util.h"
+#include "voiceinfo.h"
+#include "voiceloop.h"
 
 class CAudioServer : public IAudioServer {
 public:
@@ -27,9 +38,11 @@ public:
   STDMETHODIMP Push(AudioCommand **pAudioCommands, INT32 numAudioCommands);
   STDMETHODIMP GetVoiceCount(INT32 *pVoiceCount);
   STDMETHODIMP GetDefaultVoice(INT32 *pVoiceIndex);
-  STDMETHODIMP GetVoiceProperty(INT32 voiceIndex, VoiceProperty **pVoiceProperty);
+  STDMETHODIMP GetVoiceProperty(INT32 voiceIndex,
+                                VoiceProperty **pVoiceProperty);
   STDMETHODIMP SetDefaultVoice(INT32 voiceIndex);
-  STDMETHODIMP SetVoiceProperty(INT32 voiceIndex, VoiceProperty *pVoiceProperty);
+  STDMETHODIMP SetVoiceProperty(INT32 voiceIndex,
+                                VoiceProperty *pVoiceProperty);
 
   CAudioServer();
   ~CAudioServer();
@@ -37,6 +50,32 @@ public:
 private:
   LONG mReferenceCount;
   ITypeInfo *mTypeInfo;
+
+  int16_t mMaxWaves = 128;
+  bool mIsActive = false;
+  std::mutex mAudioServerMutex;
+
+  LogLoopContext *mLogLoopCtx = nullptr;
+  CommandLoopContext *mCommandLoopCtx = nullptr;
+  VoiceInfoContext *mVoiceInfoCtx = nullptr;
+  VoiceLoopContext *mVoiceLoopCtx = nullptr;
+  SFXLoopContext *mSFXLoopCtx = nullptr;
+  AudioLoopContext *mVoiceRenderCtx = nullptr;
+  AudioLoopContext *mSFXRenderCtx = nullptr;
+
+  HANDLE mLogLoopThread = nullptr;
+  HANDLE mCommandLoopThread = nullptr;
+  HANDLE mVoiceInfoThread = nullptr;
+  HANDLE mVoiceLoopThread = nullptr;
+  HANDLE mVoiceRenderThread = nullptr;
+  HANDLE mSFXLoopThread = nullptr;
+  HANDLE mSFXRenderThread = nullptr;
+
+  HANDLE mNextVoiceEvent = nullptr;
+  HANDLE mNextSoundEvent = nullptr;
+
+  PCMAudio::RingEngine *mVoiceEngine = nullptr;
+  PCMAudio::LauncherEngine *mFSXEngine = nullptr;
 };
 
 class CAudioServerFactory : public IClassFactory {
