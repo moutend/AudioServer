@@ -603,9 +603,9 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
       delete[] mCommandLoopCtx->Commands[offset]->Text;
       mCommandLoopCtx->Commands[offset]->Text = nullptr;
 
-      textLen = std::wcslen(pCommands[i]->Text);
+      textLen = std::wcslen(pCommands[i]->TextToSpeech);
       mCommandLoopCtx->Commands[offset]->Text = new wchar_t[textLen + 1]{};
-      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text, pCommands[i]->Text,
+      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text, pCommands[i]->TextToSpeech,
                    textLen);
 
       break;
