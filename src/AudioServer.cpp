@@ -652,7 +652,7 @@ STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceIndex) {
 
   Log->Info(L"Called GetDefaultVoice", GetCurrentThreadId(), __LONGFILE__);
 
-  *pVoiceCount = mVoiceInfoCtx->DefaultVoiceIndex;
+  *pVoiceIndex = mVoiceInfoCtx->DefaultVoiceIndex;
 
   return S_OK;
 }
@@ -692,8 +692,7 @@ STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 index) {
 }
 
 STDMETHODIMP
-CAudioServer::SetVoiceProperty(INT32 voiceIndex,
-                               RawVoiceProperty *pVoiceProperty) {
+CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
   if (mVoiceInfoCtx == nullptr || index < 0 ||
       index > (mVoiceInfoCtx->Count - 1) ||
       mVoiceInfoCtx->VoiceProperties == nullptr) {
