@@ -12,7 +12,7 @@
 
 extern Logger::Logger *Log;
 
-const TCHAR ProgIDStr[] = TEXT("Sample.AudioServer");
+const TCHAR ProgIDStr[] = TEXT("AudioServer");
 LONG LockCount{};
 HINSTANCE AudioServerDLLInstance{};
 TCHAR AudioServerCLSIDStr[256]{};
@@ -817,7 +817,7 @@ STDAPI DllRegisterServer(void) {
   wsprintf(szKey, TEXT("CLSID\\%s"), AudioServerCLSIDStr);
 
   if (!CreateRegistryKey(HKEY_CLASSES_ROOT, szKey, nullptr,
-                         TEXT("COM Server Sample2"))) {
+                         TEXT("COM Audio Server"))) {
     return E_FAIL;
   }
 
@@ -846,7 +846,7 @@ STDAPI DllRegisterServer(void) {
   wsprintf(szKey, TEXT("%s"), ProgIDStr);
 
   if (!CreateRegistryKey(HKEY_CLASSES_ROOT, szKey, nullptr,
-                         TEXT("COM Server Sample2"))) {
+                         TEXT("COM Audio Server"))) {
     return E_FAIL;
   }
 
