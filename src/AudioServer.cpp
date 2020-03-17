@@ -605,8 +605,8 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
 
       textLen = std::wcslen(pCommands[i]->TextToSpeech);
       mCommandLoopCtx->Commands[offset]->Text = new wchar_t[textLen + 1]{};
-      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text, pCommands[i]->TextToSpeech,
-                   textLen);
+      std::wmemcpy(mCommandLoopCtx->Commands[offset]->Text,
+                   pCommands[i]->TextToSpeech, textLen);
 
       break;
     default:
@@ -634,10 +634,7 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
 }
 
 STDMETHODIMP CAudioServer::GetVoiceCount(INT32 *pVoiceCount) {
-  if (pVoiceCount == nullptr) {
-    return E_FAIL;
-  }
-  if (mVoiceInfoCtx == nullptr) {
+  if (pVoiceCount == nullptr || mVoiceInfoCtx == nullptr) {
     return E_FAIL;
   }
 
@@ -648,24 +645,92 @@ STDMETHODIMP CAudioServer::GetVoiceCount(INT32 *pVoiceCount) {
   return S_OK;
 }
 
-STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceCount) {
-  return E_NOTIMPL;
+STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceIndex) {
+  if (pVoiceIndex == nullptr || mVoiceInfoCtx == nullptr) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Called GetDefaultVoice", GetCurrentThreadId(), __LONGFILE__);
+
+  *pVoiceCount = mVoiceInfoCtx->DefaultVoiceIndex;
+
+  return S_OK;
 }
 
 STDMETHODIMP
-CAudioServer::GetVoiceProperty(INT32 voiceIndex,
-                               RawVoiceProperty **pRawVoiceProperty) {
-  return E_NOTIMPL;
+CAudioServer::GetVoiceProperty(INT32 index,
+                               RawVoiceProperty **ppVoiceProperty) {
+  if (mVoiceInfoCtx == nullptr || mVoiceInfoCtx->VoiceProperties == nullptr ||
+      index < 0 || index > (mVoiceInfoCtx->Count - 1)) {
+    return E_FAIL;
+  }
+
+  (*ppVoiceProperty)->Language =
+      mVoiceInfoCtx->VoiceProperties[index]->Language;
+  (*ppVoiceProperty)->DisplayName =
+      mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
+  (*ppVoiceProperty)->SpeakingRate =
+      mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate;
+  (*ppVoiceProperty)->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
+  (*ppVoiceProperty)->Volume =
+      mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
+
+  return S_OK;
 }
 
-STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 voiceIndex) {
-  return E_NOTIMPL;
+STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 index) {
+  if (mVoiceInfoCtx == nullptr || index < 0 ||
+      index > static_cast<int32_t>(mVoiceInfoCtx->Count)) {
+    return E_FAIL;
+  }
+
+  Log->Info(L"Called GetDefaultVoice", GetCurrentThreadId(), __LONGFILE__);
+
+  mVoiceInfoCtx->DefaultVoiceIndex = index;
+
+  return S_OK;
 }
 
 STDMETHODIMP
 CAudioServer::SetVoiceProperty(INT32 voiceIndex,
-                               RawVoiceProperty *pRawVoiceProperty) {
-  return E_NOTIMPL;
+                               RawVoiceProperty *pVoiceProperty) {
+  if (mVoiceInfoCtx == nullptr || index < 0 ||
+      index > (mVoiceInfoCtx->Count - 1) ||
+      mVoiceInfoCtx->VoiceProperties == nullptr) {
+    return E_FAIL;
+  }
+  if (pVoiceProperty->SpeakingRate >= 0.0) {
+    double rate = pVoiceProperty->SpeakingRate;
+
+    if (rate < 0.5) {
+      rate = 0.5;
+    }
+    if (rate > 6.0) {
+      rate = 6.0;
+    }
+
+    mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate = rate;
+  }
+  if (pVoiceProperty->Pitch >= 0.0) {
+    double pitch = pVoiceProperty->Pitch;
+
+    if (pitch > 2.0) {
+      pitch = 2.0;
+    }
+
+    mVoiceInfoCtx->VoiceProperties[index]->AudioPitch = pitch;
+  }
+  if (pVoiceProperty->Volume >= 0.0) {
+    double volume = pVoiceProperty->Volume;
+
+    if (volume > 1.0) {
+      volume = 1.0;
+    }
+
+    mVoiceInfoCtx->VoiceProperties[index]->AudioVolume = volume;
+  }
+
+  return S_OK;
 }
 
 // CAudioServerFactory

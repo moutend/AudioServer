@@ -41,8 +41,8 @@ public:
   STDMETHODIMP GetDefaultVoice(INT32 *pVoiceIndex);
   STDMETHODIMP GetVoiceProperty(INT32 voiceIndex,
                                 RawVoiceProperty **pRawVoiceProperty);
-  STDMETHODIMP SetDefaultVoice(INT32 voiceIndex);
-  STDMETHODIMP SetVoiceProperty(INT32 voiceIndex,
+  STDMETHODIMP SetDefaultVoice(INT32 index);
+  STDMETHODIMP SetVoiceProperty(INT32 index,
                                 RawVoiceProperty *pRawVoiceProperty);
 
   CAudioServer();
