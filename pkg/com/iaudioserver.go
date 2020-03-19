@@ -8,12 +8,10 @@ import (
 )
 
 type IAudioServer struct {
-	ole.IUnknown
 	ole.IDispatch
 }
 
 type IAudioServerVtbl struct {
-	ole.IUnknownVtbl
 	ole.IDispatchVtbl
 	Start            uintptr
 	Stop             uintptr
