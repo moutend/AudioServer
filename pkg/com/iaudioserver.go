@@ -4,6 +4,7 @@ import (
 	"unsafe"
 
 	"github.com/go-ole/go-ole"
+	"github.com/moutend/AudioServer/pkg/types"
 )
 
 type IAudioServer struct {
@@ -44,4 +45,8 @@ func (v *IAudioServer) FadeIn() error {
 
 func (v *IAudioServer) FadeOut() error {
 	return asFadeOut(v)
+}
+
+func (v *IAudioServer) Push(commands []types.Command) error {
+	return asPush(v, commands)
 }
