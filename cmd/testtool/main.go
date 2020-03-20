@@ -37,7 +37,7 @@ func run(args []string) error {
 
 	err := audioServer.Start()
 	fmt.Println("Called IAudioServer::Start", err)
-	time.Sleep(3 * time.Second)
+	time.Sleep(11 * time.Second)
 	err = audioServer.Push([]types.Command{
 		{
 			Type:         3,
