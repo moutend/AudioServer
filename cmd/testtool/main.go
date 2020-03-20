@@ -35,15 +35,16 @@ func run(args []string) error {
 	defer audioServer.Stop()
 	defer audioServer.Release()
 
-	audioServer.Start()
-	fmt.Println("Start audio server")
+	err := audioServer.Start()
+	fmt.Println("Called IAudioServer::Start", err)
 	time.Sleep(3 * time.Second)
-	audioServer.Push([]types.Command{
+	err = audioServer.Push([]types.Command{
 		{
 			Type:         3,
 			TextToSpeech: "こんにちは",
 		},
 	})
+	fmt.Println("Called IAudioServer::()Push", err)
 	time.Sleep(10 * time.Second)
 	return nil
 }
