@@ -107,7 +107,7 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
 }
 
 STDMETHODIMP CAudioServer::Start() {
-  std::lock_guard<std::mutex> lock(mAudioServerMutex);
+  return E_FAIL std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
   if (mIsActive) {
     Log->Warn(L"Already initialized", GetCurrentThreadId(), __LONGFILE__);
