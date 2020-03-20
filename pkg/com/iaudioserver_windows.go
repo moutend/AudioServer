@@ -12,7 +12,12 @@ import (
 )
 
 func asStart(v *IAudioServer) error {
-	hr, _, _ := syscall.Syscall(v.VTable().Start, 0, 0, 0, 0)
+	hr, _, _ := syscall.Syscall(
+		v.VTable().Start,
+		0,
+		uintptr(unsafe.Pointer(v)),
+		0,
+		0)
 
 	if hr != 0 {
 		return ole.NewError(hr)
@@ -22,7 +27,12 @@ func asStart(v *IAudioServer) error {
 }
 
 func asStop(v *IAudioServer) error {
-	hr, _, _ := syscall.Syscall(v.VTable().Stop, 0, 0, 0, 0)
+	hr, _, _ := syscall.Syscall(
+		v.VTable().Stop,
+		0,
+		uintptr(unsafe.Pointer(v)),
+		0,
+		0)
 
 	if hr != 0 {
 		return ole.NewError(hr)
@@ -32,7 +42,12 @@ func asStop(v *IAudioServer) error {
 }
 
 func asFadeIn(v *IAudioServer) error {
-	hr, _, _ := syscall.Syscall(v.VTable().FadeIn, 0, 0, 0, 0)
+	hr, _, _ := syscall.Syscall(
+		v.VTable().FadeIn,
+		0,
+		uintptr(unsafe.Pointer(v)),
+		0,
+		0)
 
 	if hr != 0 {
 		return ole.NewError(hr)
@@ -42,7 +57,12 @@ func asFadeIn(v *IAudioServer) error {
 }
 
 func asFadeOut(v *IAudioServer) error {
-	hr, _, _ := syscall.Syscall(v.VTable().FadeOut, 0, 0, 0, 0)
+	hr, _, _ := syscall.Syscall(
+		v.VTable().FadeOut,
+		0,
+		uintptr(unsafe.Pointer(v)),
+		0,
+		0)
 
 	if hr != 0 {
 		return ole.NewError(hr)
@@ -74,7 +94,15 @@ func asPush(v *IAudioServer, commands []types.Command) error {
 		}
 	}
 
-	hr, _, _ := syscall.Syscall(v.VTable().FadeOut, 2, uintptr(unsafe.Pointer(&ps[0])), uintptr(len(commands)), 0)
+	hr, _, _ := syscall.Syscall6(
+		v.VTable().FadeOut,
+		3,
+		uintptr(unsafe.Pointer(v)),
+		uintptr(unsafe.Pointer(&ps[0])),
+		uintptr(len(commands)),
+		1,
+		0,
+		0)
 
 	if hr != 0 {
 		return ole.NewError(hr)
