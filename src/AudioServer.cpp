@@ -562,6 +562,8 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
   if (!mIsActive || pCommands == nullptr || commandsLength <= 0) {
+    Log->Warn(L"Skipped IAudioServer::Push()", GetCurrentThreadId(),
+              __LONGFILE__);
     return E_FAIL;
   }
 
