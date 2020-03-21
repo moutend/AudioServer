@@ -173,6 +173,10 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 }
 
 func u16ptrToString(data uintptr, capacity int) string {
+	if data == 0 || capacity == 0 {
+		return ""
+	}
+
 	u16hdr := reflect.SliceHeader{Data: data, Len: capacity, Cap: capacity}
 	u16s := *(*[]uint16)(unsafe.Pointer(&u16hdr))
 
