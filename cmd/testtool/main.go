@@ -45,6 +45,6 @@ func run(args []string) error {
 		},
 	})
 	fmt.Println("Called IAudioServer::()Push", err)
-	time.Sleep(10 * time.Second)
+	time.Sleep(11 * time.Second)
 	return nil
 }

@@ -568,7 +568,7 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
   wchar_t *msg = new wchar_t[256]{};
 
   HRESULT hr = StringCbPrintfW(
-      msg, 255, L"Called Push Read=%d,Write=%d,IsForce=%d",
+      msg, 255, L"Called IAudioServer::Push() Read=%d,Write=%d,IsForce=%d",
       mCommandLoopCtx->ReadIndex, mCommandLoopCtx->WriteIndex, isForcePush);
 
   if (FAILED(hr)) {
