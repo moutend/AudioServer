@@ -46,5 +46,21 @@ func run(args []string) error {
 	})
 	fmt.Println("Called IAudioServer::()Push", err)
 	time.Sleep(11 * time.Second)
+	count, err := audioServer.GetVoiceCount()
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("@@@count", count)
+
+	property, err := audioServer.GetVoiceProperty(0)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("@@@property %+v\n", property)
+
 	return nil
 }
