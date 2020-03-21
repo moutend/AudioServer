@@ -95,7 +95,7 @@ func asPush(v *IAudioServer, commands []types.Command) error {
 	}
 
 	hr, _, _ := syscall.Syscall6(
-		v.VTable().FadeOut,
+		v.VTable().Push,
 		3,
 		uintptr(unsafe.Pointer(v)),
 		uintptr(unsafe.Pointer(&ps[0])),
