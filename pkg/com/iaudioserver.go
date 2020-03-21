@@ -48,3 +48,15 @@ func (v *IAudioServer) FadeOut() error {
 func (v *IAudioServer) Push(commands []types.Command) error {
 	return asPush(v, commands)
 }
+
+func (v *IAudioServer) GetVoiceCount() (int, error) {
+	return asGetVoiceCount(v)
+}
+
+func (v *IAudioServer) GetDefaultVoice() (int, error) {
+	return asGetDefaultVoice(v)
+}
+
+func (v *IAudioServer) GetVoiceProperty(index int) (*types.VoiceProperty, error) {
+	return asGetVoiceProperty(v, index)
+}

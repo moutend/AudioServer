@@ -13,3 +13,23 @@ type RawCommand struct {
 	TextToSpeech uintptr
 	WaitDuration float64
 }
+
+type VoiceProperty struct {
+	Id           int
+	Language     string
+	DisplayName  string
+	SpeakingRate float64
+	Volume       float64
+	Pitch        float64
+}
+
+type RawVoiceProperty struct {
+	Id                int32
+	LanguageLength    int16
+	DisplayNameLength int16
+	Language          uintptr
+	DisplayName       uintptr
+	SpeakingRate      float64
+	Volume            float64
+	Pitch             float64
+}

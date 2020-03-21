@@ -26,3 +26,15 @@ func asFadeOut(v *IAudioServer) error {
 func asPush(v *IAudioServer, commands []types.Command) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
+
+func asGetVoiceCount(v *IAudioServer) (int, error) {
+	return -1, ole.NewError(ole.E_NOTIMPL)
+}
+
+func asGetDefaultVoice(v *IAudioServer) (int, error) {
+	return -1, ole.NewError(ole.E_NOTIMPL)
+}
+
+func asGetVoiceProperty(v *IAudioServer) (*types.VoiceProperty, error) {
+	return nil, ole.NewError(ole.E_NOTIMPL)
+}
