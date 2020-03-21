@@ -55,7 +55,7 @@ func run(args []string) error {
 	fmt.Println("@@@count", count)
 
 	property, err := audioServer.GetVoiceProperty(0)
-
+	time.Sleep(10 * time.Second)
 	if err != nil {
 		return err
 	}
