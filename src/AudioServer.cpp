@@ -679,13 +679,13 @@ CAudioServer::GetVoiceProperty(INT32 index,
         std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->DisplayName));
     (*ppVoiceProperty)->DisplayName =
         mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
-        */
+
   (*ppVoiceProperty)->SpeakingRate =
       mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate;
   (*ppVoiceProperty)->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
   (*ppVoiceProperty)->Volume =
       mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
-
+*/
   return S_OK;
 }
 
