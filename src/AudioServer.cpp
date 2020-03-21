@@ -667,8 +667,12 @@ CAudioServer::GetVoiceProperty(INT32 index,
     return E_FAIL;
   }
 
+  (*ppVoiceProperty)->LanguageLength = static_cast<INT16>(
+      std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->Language));
   (*ppVoiceProperty)->Language =
       mVoiceInfoCtx->VoiceProperties[index]->Language;
+  (*ppVoiceProperty)->DisplayNameLength = static_cast<INT16>(
+      std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->DisplayNameLength));
   (*ppVoiceProperty)->DisplayName =
       mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
   (*ppVoiceProperty)->SpeakingRate =
