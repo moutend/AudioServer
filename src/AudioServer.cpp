@@ -667,6 +667,8 @@ CAudioServer::GetVoiceProperty(INT32 index,
     return E_FAIL;
   }
 
+  Log->Info(L"Called IAudioServer::GetVoiceProperty()", GetCurrentThreadId(), __LONGFILE__);
+
   (*ppVoiceProperty)->LanguageLength = static_cast<INT16>(
       std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->Language));
   (*ppVoiceProperty)->Language =

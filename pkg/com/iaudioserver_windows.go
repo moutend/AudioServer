@@ -147,7 +147,7 @@ func asGetDefaultVoice(v *IAudioServer) (int, error) {
 }
 
 func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
-	property := types.RawVoiceProperty{}
+	property := &types.RawVoiceProperty{}
 
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetVoiceProperty,
