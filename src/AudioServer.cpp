@@ -107,7 +107,6 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
 }
 
 STDMETHODIMP CAudioServer::Start() {
-  return E_FAIL;
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
   if (mIsActive) {
