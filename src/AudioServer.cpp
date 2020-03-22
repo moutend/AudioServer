@@ -671,18 +671,16 @@ CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
 
   (*ppVoiceProperty)->LanguageLength = static_cast<INT16>(
       std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->Language));
-  (*ppVoiceProperty)->Language =
-      mVoiceInfoCtx->VoiceProperties[index]->Language;
-  (*ppVoiceProperty)->DisplayNameLength = static_cast<INT16>(
+  pVoiceProperty->Language = mVoiceInfoCtx->VoiceProperties[index]->Language;
+  pVoiceProperty->DisplayNameLength = static_cast<INT16>(
       std::wcslen(mVoiceInfoCtx->VoiceProperties[index]->DisplayName));
-  (*ppVoiceProperty)->DisplayName =
+  pVoiceProperty->DisplayName =
       mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
 
-  (*ppVoiceProperty)->SpeakingRate =
+  pVoiceProperty->SpeakingRate =
       mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate;
-  (*ppVoiceProperty)->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
-  (*ppVoiceProperty)->Volume =
-      mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
+  pVoiceProperty->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
+  pVoiceProperty->Volume = mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
 
   return S_OK;
 }
