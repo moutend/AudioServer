@@ -164,8 +164,8 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 
 	result := &types.VoiceProperty{
 		Id:           int(property.Id),
-		Language:     u16ptrToString(uintptr(property.Language), int(property.LanguageLength)),
-		DisplayName:  u16ptrToString(uintptr(property.DisplayName), int(property.DisplayNameLength)),
+		Language:     u16ptrToString(property.Language, int(property.LanguageLength)),
+		DisplayName:  u16ptrToString(property.DisplayName, int(property.DisplayNameLength)),
 		SpeakingRate: property.SpeakingRate,
 		Volume:       property.Volume,
 		Pitch:        property.Pitch,
