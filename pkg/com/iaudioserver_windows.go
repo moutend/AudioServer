@@ -3,6 +3,7 @@
 package com
 
 import (
+	"fmt"
 	"reflect"
 	"syscall"
 	"unsafe"
@@ -148,6 +149,7 @@ func asGetDefaultVoice(v *IAudioServer) (int, error) {
 
 func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
 	property := &types.RawVoiceProperty{}
+	fmt.Printf("@@@property %x\n", &property)
 
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetVoiceProperty,
@@ -160,8 +162,9 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 		return nil, ole.NewError(hr)
 	}
 
+	fmt.Printf("@@@property %x\n", &property)
 	result := &types.VoiceProperty{
-		Id: int(property.Id),
+		// Id: int(property.Id),
 		// Language:     u16ptrToString(property.Language, int(property.LanguageLength)),
 		// DisplayName:  u16ptrToString(property.DisplayName, int(property.DisplayNameLength)),
 		SpeakingRate: property.SpeakingRate,
