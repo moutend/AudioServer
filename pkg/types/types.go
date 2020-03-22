@@ -27,8 +27,8 @@ type RawVoiceProperty struct {
 	Id                int32
 	LanguageLength    int16
 	DisplayNameLength int16
-	Language          uintptr
-	DisplayName       uintptr
+	Language          uint64
+	DisplayName       uint64
 	SpeakingRate      float64
 	Volume            float64
 	Pitch             float64
