@@ -50,11 +50,13 @@ DWORD WINAPI voiceInfo(LPVOID context) {
                  idLength);
 
     size_t displayNameLength = wcslen(synth->Voice->DisplayName->Data());
+    ctx->VoiceProperties[i]->DisplayNameLength = displayNameLength;
     ctx->VoiceProperties[i]->DisplayName = new wchar_t[displayNameLength + 1]{};
     std::wmemcpy(ctx->VoiceProperties[i]->DisplayName,
                  synth->Voice->DisplayName->Data(), displayNameLength);
 
     size_t languageLength = wcslen(synth->Voice->Language->Data());
+    ctx->VoiceProperties[i]->LanguageLength = languageLength;
     ctx->VoiceProperties[i]->Language = new wchar_t[languageLength + 1]{};
     std::wmemcpy(ctx->VoiceProperties[i]->Language,
                  synth->Voice->Language->Data(), languageLength);

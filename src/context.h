@@ -13,6 +13,8 @@ struct VoiceProperty {
   wchar_t *Id = nullptr;
   wchar_t *DisplayName = nullptr;
   wchar_t *Language = nullptr;
+  size_t DisplayNameLength;
+  size_t LanguageLength;
   double SpeakingRate = 1.0;
   double AudioVolume = 1.0;
   double AudioPitch = 1.0;
