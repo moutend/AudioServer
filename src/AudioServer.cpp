@@ -677,7 +677,8 @@ CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
       mVoiceInfoCtx->VoiceProperties[index]->DisplayNameLength);
   pVoiceProperty->DisplayName =
       mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
-  * / pVoiceProperty->SpeakingRate =
+
+  pVoiceProperty->SpeakingRate =
       mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate;
   pVoiceProperty->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
   pVoiceProperty->Volume = mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
