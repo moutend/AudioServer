@@ -660,8 +660,7 @@ STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceIndex) {
 }
 
 STDMETHODIMP
-CAudioServer::GetVoiceProperty(INT32 index,
-                               RawVoiceProperty **ppVoiceProperty) {
+CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
   if (mVoiceInfoCtx == nullptr || mVoiceInfoCtx->VoiceProperties == nullptr ||
       index < 0 || index > (mVoiceInfoCtx->Count - 1)) {
     return E_FAIL;
@@ -686,7 +685,7 @@ CAudioServer::GetVoiceProperty(INT32 index,
   (*ppVoiceProperty)->Volume =
       mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
 */
-  (*ppVoiceProperty)->Pitch = 1.23;
+  pVoiceProperty->Pitch = 1.23;
 
   return S_OK;
 }
@@ -705,14 +704,14 @@ STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 index) {
 }
 
 STDMETHODIMP
-CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
+CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty voiceProperty) {
   if (mVoiceInfoCtx == nullptr || index < 0 ||
       index > (mVoiceInfoCtx->Count - 1) ||
       mVoiceInfoCtx->VoiceProperties == nullptr) {
     return E_FAIL;
   }
-  if (pVoiceProperty->SpeakingRate >= 0.0) {
-    double rate = pVoiceProperty->SpeakingRate;
+  if (voiceProperty.SpeakingRate >= 0.0) {
+    double rate = voiceProperty.SpeakingRate;
 
     if (rate < 0.5) {
       rate = 0.5;
@@ -723,8 +722,8 @@ CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
 
     mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate = rate;
   }
-  if (pVoiceProperty->Pitch >= 0.0) {
-    double pitch = pVoiceProperty->Pitch;
+  if (voiceProperty.Pitch >= 0.0) {
+    double pitch = voiceProperty.Pitch;
 
     if (pitch > 2.0) {
       pitch = 2.0;
@@ -732,8 +731,8 @@ CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
 
     mVoiceInfoCtx->VoiceProperties[index]->AudioPitch = pitch;
   }
-  if (pVoiceProperty->Volume >= 0.0) {
-    double volume = pVoiceProperty->Volume;
+  if (voiceProperty.Volume >= 0.0) {
+    double volume = voiceProperty.Volume;
 
     if (volume > 1.0) {
       volume = 1.0;

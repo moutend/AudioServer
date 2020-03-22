@@ -39,10 +39,9 @@ public:
                     INT32 isForcePush);
   STDMETHODIMP GetVoiceCount(INT32 *pVoiceCount);
   STDMETHODIMP GetDefaultVoice(INT32 *pVoiceIndex);
-  STDMETHODIMP GetVoiceProperty(INT32 index,
-                                RawVoiceProperty **ppVoiceProperty);
+  STDMETHODIMP GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty);
   STDMETHODIMP SetDefaultVoice(INT32 index);
-  STDMETHODIMP SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty);
+  STDMETHODIMP SetVoiceProperty(INT32 index, RawVoiceProperty voiceProperty);
 
   CAudioServer();
   ~CAudioServer();
