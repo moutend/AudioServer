@@ -3,6 +3,7 @@
 package com
 
 import (
+	"fmt"
 	"reflect"
 	"syscall"
 	"unsafe"
@@ -156,6 +157,7 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 		uintptr(index),
 		uintptr(unsafe.Pointer(&property)))
 
+	fmt.Printf("@@@property %+v\n", property)
 	if hr != 0 {
 		return nil, ole.NewError(hr)
 	}
