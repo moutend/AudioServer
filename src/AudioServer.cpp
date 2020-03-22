@@ -672,7 +672,7 @@ CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
   pVoiceProperty->LanguageLength =
       static_cast<INT16>(mVoiceInfoCtx->VoiceProperties[index]->LanguageLength);
   // pVoiceProperty->Language = mVoiceInfoCtx->VoiceProperties[index]->Language;
-  pVoiceProperty->Language = static_cast<LPWSTR>(0x12345678);
+  pVoiceProperty->Language = reinterpret_cast<LPWSTR>(0x12345678);
 
   pVoiceProperty->DisplayNameLength = static_cast<INT16>(
       mVoiceInfoCtx->VoiceProperties[index]->DisplayNameLength);
