@@ -686,7 +686,7 @@ CAudioServer::GetVoiceProperty(INT32 index,
   (*ppVoiceProperty)->Volume =
       mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
 */
-  // (*ppVoiceProperty)->Pitch = 1.23;
+  (*ppVoiceProperty)->Pitch = 1.23;
 
   return S_OK;
 }
