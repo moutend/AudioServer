@@ -3,7 +3,6 @@
 package com
 
 import (
-	"fmt"
 	"reflect"
 	"syscall"
 	"unsafe"
@@ -149,16 +148,14 @@ func asGetDefaultVoice(v *IAudioServer) (int, error) {
 
 func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
 	property := types.RawVoiceProperty{}
-	p := &property
-	fmt.Printf("@@@before %x %v %+v\n", &p, p == nil, property)
+
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetVoiceProperty,
 		3,
 		uintptr(unsafe.Pointer(v)),
 		uintptr(index),
-		uintptr(unsafe.Pointer(&p)))
+		uintptr(unsafe.Pointer(&property)))
 
-	fmt.Printf("@@@after %x %v %+v\n", &p, p == nil, property)
 	if hr != 0 {
 		return nil, ole.NewError(hr)
 	}
