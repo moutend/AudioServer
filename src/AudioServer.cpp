@@ -726,7 +726,7 @@ CAudioServer::SetVoiceProperty(INT32 index,
     return E_FAIL;
   }
   if (pRawVoiceProperty->SpeakingRate >= 0.0) {
-    double rate = pVoiceProperty->SpeakingRate;
+    double rate = pRawVoiceProperty->SpeakingRate;
 
     if (rate < 0.5) {
       rate = 0.5;
@@ -737,8 +737,8 @@ CAudioServer::SetVoiceProperty(INT32 index,
 
     mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate = rate;
   }
-  if (pVoiceProperty->Pitch >= 0.0) {
-    double pitch = pVoiceProperty->Pitch;
+  if (pRawVoiceProperty->Pitch >= 0.0) {
+    double pitch = pRawVoiceProperty->Pitch;
 
     if (pitch > 2.0) {
       pitch = 2.0;
@@ -746,8 +746,8 @@ CAudioServer::SetVoiceProperty(INT32 index,
 
     mVoiceInfoCtx->VoiceProperties[index]->AudioPitch = pitch;
   }
-  if (pVoiceProperty->Volume >= 0.0) {
-    double volume = pVoiceProperty->Volume;
+  if (pRawVoiceProperty->Volume >= 0.0) {
+    double volume = pRawVoiceProperty->Volume;
 
     if (volume > 1.0) {
       volume = 1.0;
