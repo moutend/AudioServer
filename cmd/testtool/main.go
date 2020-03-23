@@ -47,7 +47,7 @@ func run(args []string) error {
 	})
 	fmt.Println("Called IAudioServer::()Push", err)
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(9 * time.Second)
 
 	index, err := audioServer.GetDefaultVoice()
 
@@ -69,6 +69,12 @@ func run(args []string) error {
 
 	property.SpeakingRate += 1.0
 
+	err = audioServer.SetVoiceProperty(index, property)
+
+	if err != nil {
+		return err
+	}
+
 	err = audioServer.Push([]types.Command{
 		{
 			Type:         3,
@@ -78,7 +84,7 @@ func run(args []string) error {
 
 	fmt.Println("Called IAudioServer::()Push", err)
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(9 * time.Second)
 
 	if err != nil {
 		return err
