@@ -160,11 +160,12 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 	}
 
 	result := &types.VoiceProperty{
-		Language:     LPWSTRToString(property.Language),
-		DisplayName:  LPWSTRToString(property.DisplayName),
-		SpeakingRate: property.SpeakingRate,
-		Volume:       property.Volume,
-		Pitch:        property.Pitch,
+		RawVoiceProperty: property,
+		Language:         LPWSTRToString(property.Language),
+		DisplayName:      LPWSTRToString(property.DisplayName),
+		SpeakingRate:     property.SpeakingRate,
+		Volume:           property.Volume,
+		Pitch:            property.Pitch,
 	}
 
 	return result, nil

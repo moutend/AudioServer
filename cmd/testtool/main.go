@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"unsafe"
 
 	"github.com/moutend/AudioServer/pkg/com"
 	"github.com/moutend/AudioServer/pkg/types"
@@ -37,30 +38,53 @@ func run(args []string) error {
 
 	err := audioServer.Start()
 	fmt.Println("Called IAudioServer::Start", err)
-	time.Sleep(11 * time.Second)
+
 	err = audioServer.Push([]types.Command{
 		{
 			Type:         3,
-			TextToSpeech: "こんにちは",
+			TextToSpeech: "こんにちは、私の名前は京子です。日本語の音声をお届けします。",
 		},
 	})
 	fmt.Println("Called IAudioServer::()Push", err)
-	time.Sleep(11 * time.Second)
-	count, err := audioServer.GetVoiceCount()
+
+	time.Sleep(5 * time.Second)
+
+	index, err := audioServer.GetDefaultVoice()
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("@@@count", count)
+	property, err := audioServer.GetVoiceProperty(index)
 
-	property, err := audioServer.GetVoiceProperty(0)
-	time.Sleep(10 * time.Second)
 	if err != nil {
 		return err
 	}
+
+	defer ole.CoTaskMemFree(property.RawVoiceProperty.Language)
+	defer ole.CoTaskMemFree(property.RawVoiceProperty.DisplayName)
+	defer ole.CoTaskMemFree(uintptr(unsafe.Pointer(&(property.RawVoiceProperty))))
 
 	fmt.Printf("@@@property %+v\n", property)
+
+	property.SpeakingRate += 1.0
+
+	err = audioServer.Push([]types.Command{
+		{
+			Type:         3,
+			TextToSpeech: "こんにちは、私の名前は京子です。日本語の音声をお届けします。",
+		},
+	})
+
+	fmt.Println("Called IAudioServer::()Push", err)
+
+	time.Sleep(5 * time.Second)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("@@@done")
 
 	return nil
 }

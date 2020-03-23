@@ -15,11 +15,12 @@ type RawCommand struct {
 }
 
 type VoiceProperty struct {
-	Language     string
-	DisplayName  string
-	SpeakingRate float64
-	Volume       float64
-	Pitch        float64
+	RawVoiceProperty *RawVoiceProperty
+	Language         string
+	DisplayName      string
+	SpeakingRate     float64
+	Volume           float64
+	Pitch            float64
 }
 
 type RawVoiceProperty struct {
