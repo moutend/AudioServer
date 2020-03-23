@@ -187,7 +187,7 @@ func asSetDefaultVoice(v *IAudioServer, index int) error {
 }
 
 func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoiceProperty) error {
-	p := &types.RawVoiceProperty{
+	p := types.RawVoiceProperty{
 		SpeakingRate: property.SpeakingRate,
 		Pitch:        property.Pitch,
 		Volume:       property.Volume,
