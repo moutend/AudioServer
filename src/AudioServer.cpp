@@ -3,6 +3,7 @@
 #include <fstream>
 #include <mutex>
 #include <shlwapi.h>
+#include <strsafe.h>
 #include <windows.h>
 
 #include <strsafe.h>
@@ -660,7 +661,8 @@ STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceIndex) {
 }
 
 STDMETHODIMP
-CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
+CAudioServer::GetVoiceProperty(INT32 index,
+                               RawVoiceProperty **ppRawVoiceProperty) {
   if (mVoiceInfoCtx == nullptr || mVoiceInfoCtx->VoiceProperties == nullptr ||
       index < 0 || index > (mVoiceInfoCtx->Count - 1)) {
     return E_FAIL;
@@ -669,20 +671,35 @@ CAudioServer::GetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty) {
   Log->Info(L"Called IAudioServer::GetVoiceProperty()", GetCurrentThreadId(),
             __LONGFILE__);
 
-  pVoiceProperty->LanguageLength =
-      static_cast<INT16>(mVoiceInfoCtx->VoiceProperties[index]->LanguageLength);
-  // pVoiceProperty->Language = mVoiceInfoCtx->VoiceProperties[index]->Language;
-  pVoiceProperty->Language = reinterpret_cast<LPWSTR>(0x12345678);
+  (*ppRawVoiceProperty) = reinterpret_cast<RawVoiceProperty *>(
+      CoTaskMemAlloc(sizeof(RawVoiceProperty)));
+  (*ppRawVoiceProperty)->Language =
+      reinterpret_cast<LPWSTR>(CoTaskMemAlloc(128));
+  (*ppRawVoiceProperty)->DisplayName =
+      reinterpret_cast<LPWSTR>(CoTaskMemAlloc(128));
 
-  pVoiceProperty->DisplayNameLength = static_cast<INT16>(
-      mVoiceInfoCtx->VoiceProperties[index]->DisplayNameLength);
-  // pVoiceProperty->DisplayName =
-      mVoiceInfoCtx->VoiceProperties[index]->DisplayName;
+  HRESULT hr{};
 
-  pVoiceProperty->SpeakingRate =
+  hr = StringCbPrintfW((*ppRawVoiceProperty)->Language, 128, L"%s",
+                       mVoiceInfoCtx->VoiceProperties[index]->Language);
+
+  if (FAILED(hr)) {
+    return hr;
+  }
+
+  hr = StringCbPrintfW((*ppRawVoiceProperty)->DisplayName, 128, L"%s",
+                       mVoiceInfoCtx->VoiceProperties[index]->DisplayName);
+
+  if (FAILED(hr)) {
+    return hr;
+  }
+
+  (*ppRawVoiceProperty)->SpeakingRate =
       mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate;
-  pVoiceProperty->Pitch = mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
-  pVoiceProperty->Volume = mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
+  (*ppRawVoiceProperty)->Pitch =
+      mVoiceInfoCtx->VoiceProperties[index]->AudioPitch;
+  (*ppRawVoiceProperty)->Volume =
+      mVoiceInfoCtx->VoiceProperties[index]->AudioVolume;
 
   return S_OK;
 }
@@ -701,14 +718,15 @@ STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 index) {
 }
 
 STDMETHODIMP
-CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty voiceProperty) {
+CAudioServer::SetVoiceProperty(INT32 index,
+                               RawVoiceProperty *pRawVoiceProperty) {
   if (mVoiceInfoCtx == nullptr || index < 0 ||
       index > (mVoiceInfoCtx->Count - 1) ||
       mVoiceInfoCtx->VoiceProperties == nullptr) {
     return E_FAIL;
   }
-  if (voiceProperty.SpeakingRate >= 0.0) {
-    double rate = voiceProperty.SpeakingRate;
+  if (pRawVoiceProperty->SpeakingRate >= 0.0) {
+    double rate = pVoiceProperty->SpeakingRate;
 
     if (rate < 0.5) {
       rate = 0.5;
@@ -719,8 +737,8 @@ CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty voiceProperty) {
 
     mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate = rate;
   }
-  if (voiceProperty.Pitch >= 0.0) {
-    double pitch = voiceProperty.Pitch;
+  if (pVoiceProperty->Pitch >= 0.0) {
+    double pitch = pVoiceProperty->Pitch;
 
     if (pitch > 2.0) {
       pitch = 2.0;
@@ -728,8 +746,8 @@ CAudioServer::SetVoiceProperty(INT32 index, RawVoiceProperty voiceProperty) {
 
     mVoiceInfoCtx->VoiceProperties[index]->AudioPitch = pitch;
   }
-  if (voiceProperty.Volume >= 0.0) {
-    double volume = voiceProperty.Volume;
+  if (pVoiceProperty->Volume >= 0.0) {
+    double volume = pVoiceProperty->Volume;
 
     if (volume > 1.0) {
       volume = 1.0;
