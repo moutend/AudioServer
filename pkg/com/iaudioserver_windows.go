@@ -3,8 +3,6 @@
 package com
 
 import (
-	"fmt"
-	"reflect"
 	"syscall"
 	"unsafe"
 
@@ -148,7 +146,7 @@ func asGetDefaultVoice(v *IAudioServer) (int, error) {
 }
 
 func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
-	property := types.RawVoiceProperty{}
+	var property *types.RawVoiceProperty
 
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetVoiceProperty,
@@ -157,15 +155,13 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 		uintptr(index),
 		uintptr(unsafe.Pointer(&property)))
 
-	fmt.Printf("@@@property %+v\n", property)
 	if hr != 0 {
 		return nil, ole.NewError(hr)
 	}
 
 	result := &types.VoiceProperty{
-		Id:           int(property.Id),
-		Language:     u16ptrToString(property.Language, int(property.LanguageLength)),
-		DisplayName:  u16ptrToString(property.DisplayName, int(property.DisplayNameLength)),
+		Language:     LPWSTRToString(property.Language),
+		DisplayName:  LPWSTRToString(property.DisplayName),
 		SpeakingRate: property.SpeakingRate,
 		Volume:       property.Volume,
 		Pitch:        property.Pitch,
@@ -174,13 +170,22 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 	return result, nil
 }
 
-func u16ptrToString(data uintptr, capacity int) string {
-	if data == 0 || capacity == 0 {
+func LPWSTRToString(lpwstr uintptr) string {
+	if lpwstr == 0 {
 		return ""
 	}
 
-	u16hdr := reflect.SliceHeader{Data: data, Len: capacity, Cap: capacity}
-	u16s := *(*[]uint16)(unsafe.Pointer(&u16hdr))
+	us := []uint16{}
 
-	return syscall.UTF16ToString(u16s)
+	for i := 0; i < 1024; i += 2 {
+		u := *(*uint16)(unsafe.Pointer(lpwstr + uintptr(i)))
+
+		if u == 0 {
+			break
+		}
+
+		us = append(us, u)
+	}
+
+	return syscall.UTF16ToString(us)
 }
