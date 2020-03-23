@@ -60,3 +60,11 @@ func (v *IAudioServer) GetDefaultVoice() (int, error) {
 func (v *IAudioServer) GetVoiceProperty(index int) (*types.VoiceProperty, error) {
 	return asGetVoiceProperty(v, index)
 }
+
+func (v *IAudioServer) SetDefaultVoice(index int) error {
+	return asSetDefaultVoice(v, index)
+}
+
+func (v *IAudioServer) SetVoiceProperty(index int, property *types.VoiceProperty) error {
+	return asSetVoiceProperty(v, index, property)
+}

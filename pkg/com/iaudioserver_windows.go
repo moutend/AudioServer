@@ -170,6 +170,42 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 	return result, nil
 }
 
+func asSetDefaultVoice(v *IAudioServer, index int) error {
+	hr, _, _ := syscall.Syscall(
+		v.VTable().SetDefaultVoice,
+		2,
+		uintptr(unsafe.Pointer(v)),
+		uintptr(index),
+		0)
+
+	if hr != 0 {
+		return ole.NewError(hr)
+	}
+
+	return nil
+}
+
+func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoiceProperty) error {
+	p := &types.RawVoiceProperty{
+		SpeakingRate: property.SpeakingRate,
+		Pitch:        property.Pitch,
+		Volume:       property.Volume,
+	}
+
+	hr, _, _ := syscall.Syscall(
+		v.VTable().SetVoiceProperty,
+		3,
+		uintptr(unsafe.Pointer(v)),
+		uintptr(index),
+		uintptr(unsafe.Pointer(&p)))
+
+	if hr != 0 {
+		return ole.NewError(hr)
+	}
+
+	return nil
+}
+
 func LPWSTRToString(lpwstr uintptr) string {
 	if lpwstr == 0 {
 		return ""
