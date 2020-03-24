@@ -759,6 +759,12 @@ CAudioServer::SetVoiceProperty(INT32 index,
   return S_OK;
 }
 
+CAudioServer::SetNotifyIdleStateHandler(
+    NotifyIdleStateHandler notifyIdleStateHandler) {
+  notifyIdleStateHandler(12345);
+  return S_OK;
+}
+
 // CAudioServerFactory
 STDMETHODIMP CAudioServerFactory::QueryInterface(REFIID riid,
                                                  void **ppvObject) {

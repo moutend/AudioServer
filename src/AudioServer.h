@@ -43,6 +43,8 @@ public:
                                 RawVoiceProperty **ppRawVoiceProperty);
   STDMETHODIMP SetDefaultVoice(INT32 index);
   STDMETHODIMP SetVoiceProperty(INT32 index, RawVoiceProperty *pVoiceProperty);
+  STDMETHODIMP
+  SetNotifyIdleStateHandler(NotifyIdleStateHandler notifyStateHandler);
 
   CAudioServer();
   ~CAudioServer();
