@@ -33,6 +33,9 @@ func run(args []string) error {
 	if err := com.CoCreateInstance(com.CLSID_AudioServer, 0, com.CLSCTX_ALL, com.IID_IAudioServer, &audioServer); err != nil {
 		return err
 	}
+
+	fmt.Println("@@@instance created")
+
 	defer audioServer.Stop()
 	defer audioServer.Release()
 
