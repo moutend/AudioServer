@@ -39,6 +39,13 @@ func run(args []string) error {
 	err := audioServer.Start()
 	fmt.Println("Called IAudioServer::Start", err)
 
+	err = audioServer.SetNotifyIdleStateHandler(func(v int64) int64 {
+		fmt.Println("@@@idle", v)
+
+		return 0
+	})
+	fmt.Println("Called IAudioServer::SetNotifyIdleStateHandler", err)
+
 	err = audioServer.Push([]types.Command{
 		{
 			Type:         3,
@@ -91,11 +98,6 @@ func run(args []string) error {
 	}
 
 	fmt.Println("@@@done")
-	audioServer.SetNotifyIdleStateHandler(func(v int64) int64 {
-		fmt.Println("@@@idle", v)
-
-		return 0
-	})
 
 	return nil
 }
