@@ -32,9 +32,40 @@ CAudioServer::CAudioServer() : mReferenceCount(1), mTypeInfo(nullptr) {
     pTypeLib->GetTypeInfoOfGuid(IID_IAudioServer, &mTypeInfo);
     pTypeLib->Release();
   }
+
+  mVoiceInfoCtx = new VoiceInfoContext();
+
+  mVoiceInfoThread = CreateThread(
+      nullptr, 0, voiceInfo, static_cast<void *>(mVoiceInfoCtx), 0, nullptr);
+
+  if (mVoiceInfoThread == nullptr) {
+    return;
+  }
+
+  WaitForSingleObject(mVoiceInfoThread, INFINITE);
+  SafeCloseHandle(&mVoiceInfoThread);
 }
 
-CAudioServer::~CAudioServer() { LockModule(false); }
+CAudioServer::~CAudioServer() {
+  LockModule(false);
+
+  for (unsigned int i = 0; i < mVoiceInfoCtx->Count; i++) {
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->Id;
+    mVoiceInfoCtx->VoiceProperties[i]->Id = nullptr;
+
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->DisplayName;
+    mVoiceInfoCtx->VoiceProperties[i]->DisplayName = nullptr;
+
+    delete[] mVoiceInfoCtx->VoiceProperties[i]->Language;
+    mVoiceInfoCtx->VoiceProperties[i]->Language = nullptr;
+  }
+
+  delete[] mVoiceInfoCtx->VoiceProperties;
+  mVoiceInfoCtx->VoiceProperties = nullptr;
+
+  delete mVoiceInfoCtx;
+  mVoiceInfoCtx = nullptr;
+}
 
 STDMETHODIMP CAudioServer::QueryInterface(REFIID riid, void **ppvObject) {
   *ppvObject = nullptr;
@@ -140,24 +171,6 @@ STDMETHODIMP CAudioServer::Start() {
     Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
     return E_FAIL;
   }
-
-  mVoiceInfoCtx = new VoiceInfoContext();
-
-  Log->Info(L"Create voice info loop thread", GetCurrentThreadId(),
-            __LONGFILE__);
-
-  mVoiceInfoThread = CreateThread(
-      nullptr, 0, voiceInfo, static_cast<void *>(mVoiceInfoCtx), 0, nullptr);
-
-  if (mVoiceInfoThread == nullptr) {
-    Log->Fail(L"Failed to create thread", GetCurrentThreadId(), __LONGFILE__);
-    return E_FAIL;
-  }
-
-  WaitForSingleObject(mVoiceInfoThread, INFINITE);
-  SafeCloseHandle(&mVoiceInfoThread);
-
-  Log->Info(L"Delete voice info thread", GetCurrentThreadId(), __LONGFILE__);
 
   mVoiceEngine = new PCMAudio::RingEngine();
 
@@ -409,23 +422,6 @@ END_COMMANDLOOP_CLEANUP:
   SafeCloseHandle(&(mVoiceLoopCtx->NextEvent));
   SafeCloseHandle(&(mVoiceLoopCtx->FeedEvent));
 
-  for (unsigned int i = 0; i < mVoiceInfoCtx->Count; i++) {
-    delete[] mVoiceInfoCtx->VoiceProperties[i]->Id;
-    mVoiceInfoCtx->VoiceProperties[i]->Id = nullptr;
-
-    delete[] mVoiceInfoCtx->VoiceProperties[i]->DisplayName;
-    mVoiceInfoCtx->VoiceProperties[i]->DisplayName = nullptr;
-
-    delete[] mVoiceInfoCtx->VoiceProperties[i]->Language;
-    mVoiceInfoCtx->VoiceProperties[i]->Language = nullptr;
-  }
-
-  delete[] mVoiceInfoCtx->VoiceProperties;
-  mVoiceInfoCtx->VoiceProperties = nullptr;
-
-  delete mVoiceInfoCtx;
-  mVoiceInfoCtx = nullptr;
-
   delete mVoiceLoopCtx;
   mVoiceLoopCtx = nullptr;
 
@@ -641,7 +637,8 @@ STDMETHODIMP CAudioServer::GetVoiceCount(INT32 *pVoiceCount) {
     return E_FAIL;
   }
 
-  Log->Info(L"Called GetVoiceCount()", GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(L"Called IAudioServer::GetVoiceCount()", GetCurrentThreadId(),
+            __LONGFILE__);
 
   *pVoiceCount = mVoiceInfoCtx->Count;
 
@@ -653,7 +650,8 @@ STDMETHODIMP CAudioServer::GetDefaultVoice(INT32 *pVoiceIndex) {
     return E_FAIL;
   }
 
-  Log->Info(L"Called GetDefaultVoice", GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(L"Called IAudioServer::GetDefaultVoice", GetCurrentThreadId(),
+            __LONGFILE__);
 
   *pVoiceIndex = mVoiceInfoCtx->DefaultVoiceIndex;
 
@@ -710,7 +708,8 @@ STDMETHODIMP CAudioServer::SetDefaultVoice(INT32 index) {
     return E_FAIL;
   }
 
-  Log->Info(L"Called GetDefaultVoice", GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(L"Called IAudioServer::SetDefaultVoice", GetCurrentThreadId(),
+            __LONGFILE__);
 
   mVoiceInfoCtx->DefaultVoiceIndex = index;
 
@@ -725,6 +724,10 @@ CAudioServer::SetVoiceProperty(INT32 index,
       mVoiceInfoCtx->VoiceProperties == nullptr) {
     return E_FAIL;
   }
+
+  Log->Info(L"Called IAudioServer::SetVoiceProperty", GetCurrentThreadId(),
+            __LONGFILE__);
+
   if (pRawVoiceProperty->SpeakingRate >= 0.0) {
     double rate = pRawVoiceProperty->SpeakingRate;
 
@@ -762,7 +765,8 @@ CAudioServer::SetVoiceProperty(INT32 index,
 STDMETHODIMP
 CAudioServer::SetNotifyIdleStateHandler(
     NotifyIdleStateHandler notifyIdleStateHandler) {
-  notifyIdleStateHandler(12345);
+  mVoiceInfoCtx->NotifyIdleState = notifyIdleStateHandler;
+
   return S_OK;
 }
 

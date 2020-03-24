@@ -34,6 +34,11 @@ DWORD WINAPI commandLoop(LPVOID context) {
     }
     if (ctx->ReadIndex == ctx->WriteIndex) {
       ctx->IsIdle = true;
+
+      if (ctx->NotifyIdleState != nullptr) {
+        ctx->NotifyIdleState(0);
+      }
+
       continue;
     }
     switch (waitResult) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <AudioServer/IAudioServer.h>
 #include <cppaudio/engine.h>
 #include <windows.h>
 
@@ -55,6 +56,7 @@ struct CommandLoopContext {
   int32_t ReadIndex = 0;
   int32_t WriteIndex = 0;
   int32_t MaxCommands = 256;
+  NotifyIdleStateHandler NotifyIdleState = nullptr;
 };
 
 struct AudioLoopContext {
