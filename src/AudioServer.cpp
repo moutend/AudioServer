@@ -765,7 +765,11 @@ CAudioServer::SetVoiceProperty(INT32 index,
 STDMETHODIMP
 CAudioServer::SetNotifyIdleStateHandler(
     NotifyIdleStateHandler notifyIdleStateHandler) {
-  mVoiceInfoCtx->NotifyIdleState = notifyIdleStateHandler;
+  if (mCommandLoopCtx == nullptr) {
+    return E_FAIL;
+  }
+
+  mCommandLoopCtx->NotifyIdleState = notifyIdleStateHandler;
 
   return S_OK;
 }
