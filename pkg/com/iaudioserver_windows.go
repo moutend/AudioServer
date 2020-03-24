@@ -207,6 +207,21 @@ func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoicePropert
 	return nil
 }
 
+func asSetNotifyIdleStateHandler(v *IAudioServer, handler NotifyIdleStateFunc) error {
+	hr, _, _ := syscall.Syscall(
+		v.VTable().SetNotifyIdleStateHandler,
+		2,
+		uintptr(unsafe.Pointer(v)),
+		uintptr(syscall.NewCallback(handler)),
+		0)
+
+	if hr != 0 {
+		return ole.NewError(hr)
+	}
+
+	return nil
+}
+
 func LPWSTRToString(lpwstr uintptr) string {
 	if lpwstr == 0 {
 		return ""

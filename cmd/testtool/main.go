@@ -91,6 +91,11 @@ func run(args []string) error {
 	}
 
 	fmt.Println("@@@done")
+	audioServer.SetNotifyIdleStateHandler(func(v int64) int64 {
+		fmt.Println("@@@idle", v)
+
+		return 0
+	})
 
 	return nil
 }

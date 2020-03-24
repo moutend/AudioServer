@@ -43,6 +43,10 @@ func asSetDefaultVoice(v *IAudioServer, index int) (*types.VoiceProperty, error)
 	return nil, ole.NewError(ole.E_NOTIMPL)
 }
 
-func asSetDefaultVoice(v *IAudioServer, index int, property *types.RawVoiceProperty) (*types.VoiceProperty, error) {
-	return nil, ole.NewError(ole.E_NOTIMPL)
+func asSetDefaultVoice(v *IAudioServer, index int, property *types.RawVoiceProperty) error {
+	return ole.NewError(ole.E_NOTIMPL)
+}
+
+func asSetNotifyIdleStateHandler(v *IAudioServer, handler NotifyIdleStateFunc) error {
+	return ole.NewError(ole.E_NOTIMPL)
 }
