@@ -859,7 +859,7 @@ STDAPI DllRegisterServer(void) {
   wsprintf(szKey, TEXT("CLSID\\%s"), AudioServerCLSIDStr);
 
   if (!CreateRegistryKey(HKEY_CLASSES_ROOT, szKey, nullptr,
-                         TEXT("COM Audio Server"))) {
+                         TEXT("ScreenReaderX.AudioServer"))) {
     return E_FAIL;
   }
 
@@ -888,7 +888,7 @@ STDAPI DllRegisterServer(void) {
   wsprintf(szKey, TEXT("%s"), ProgIDStr);
 
   if (!CreateRegistryKey(HKEY_CLASSES_ROOT, szKey, nullptr,
-                         TEXT("COM Audio Server"))) {
+                         TEXT("ScreenReaderX.AudioServer"))) {
     return E_FAIL;
   }
 
