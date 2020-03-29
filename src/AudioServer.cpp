@@ -13,7 +13,7 @@
 
 extern Logger::Logger *Log;
 
-const TCHAR ProgIDStr[] = TEXT("AudioServer");
+const TCHAR ProgIDStr[] = TEXT("COM Audio Server");
 LONG LockCount{};
 HINSTANCE AudioServerDLLInstance{};
 TCHAR AudioServerCLSIDStr[256]{};
