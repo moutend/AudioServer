@@ -1,6 +1,6 @@
 #pragma once
 
-#include <AudioServer/IAudioServer.h>
+#include <IAudioServer/IAudioServer.h>
 #include <cppaudio/engine.h>
 #include <mutex>
 #include <windows.h>

@@ -9,7 +9,7 @@
 #include <strsafe.h>
 
 #include "AudioServer.h"
-#include <AudioServer/IAudioServer.h>
+#include <IAudioServer/IAudioServer.h>
 
 extern Logger::Logger *Log;
 
