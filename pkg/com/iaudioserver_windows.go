@@ -14,7 +14,7 @@ import (
 func asStart(v *IAudioServer) error {
 	hr, _, _ := syscall.Syscall(
 		v.VTable().Start,
-		0,
+		1,
 		uintptr(unsafe.Pointer(v)),
 		0,
 		0)
@@ -29,7 +29,7 @@ func asStart(v *IAudioServer) error {
 func asStop(v *IAudioServer) error {
 	hr, _, _ := syscall.Syscall(
 		v.VTable().Stop,
-		0,
+		1,
 		uintptr(unsafe.Pointer(v)),
 		0,
 		0)
@@ -96,7 +96,7 @@ func asPush(v *IAudioServer, commands []types.Command) error {
 
 	hr, _, _ := syscall.Syscall6(
 		v.VTable().Push,
-		3,
+		4,
 		uintptr(unsafe.Pointer(v)),
 		uintptr(unsafe.Pointer(&ps[0])),
 		uintptr(len(commands)),
