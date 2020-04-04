@@ -6,19 +6,19 @@ import (
 )
 
 func postAudio(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("postAudio", r.Method, r.URL)
 
 	return
 }
 
 func postAudioRestart(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("postAudioRestart", r.Method, r.URL)
 
 	return
 }
 
 func postAudioPause(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("postAudioPause", r.Method, r.URL)
 
 	return
 }

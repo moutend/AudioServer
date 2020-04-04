@@ -27,9 +27,10 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	router := api.Setup(chi.NewRouter())
+	router := chi.NewRouter()
+	api.Setup(router)
 
-	address := "localhost:7901"
+	address := "localhost:7902"
 
 	if a := viper.GetString("server.address"); a != "" {
 		address = a

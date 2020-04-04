@@ -6,9 +6,9 @@ import (
 	"github.com/moutend/AudioServer/internal/api/voice"
 )
 
-func Setup(router chi.Router) chi.Router {
-	return router.Route("/v1", func(r chi.Router) {
-		r = audio.Setup(r)
-		r = voice.Setup(r)
+func Setup(router chi.Router) {
+	router.Route("/v1", func(r chi.Router) {
+		audio.Setup(r)
+		voice.Setup(r)
 	})
 }

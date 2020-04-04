@@ -6,25 +6,25 @@ import (
 )
 
 func getDefaultVoice(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("getDefaultVoice", r.Method, r.URL)
 
 	return
 }
 
 func putDefaultVoice(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("putDefaultVoice", r.Method, r.URL)
 
 	return
 }
 
 func getVoiceProperty(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("getVoiceProperty", r.Method, r.URL)
 
 	return
 }
 
 func putVoiceProperty(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	log.Println("putVoiceProperty", r.Method, r.URL)
 
 	return
 }
