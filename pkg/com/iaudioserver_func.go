@@ -39,11 +39,11 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 	return nil, ole.NewError(ole.E_NOTIMPL)
 }
 
-func asSetDefaultVoice(v *IAudioServer, index int) (*types.VoiceProperty, error) {
-	return nil, ole.NewError(ole.E_NOTIMPL)
+func asSetDefaultVoice(v *IAudioServer, index int) error {
+	return ole.NewError(ole.E_NOTIMPL)
 }
 
-func asSetDefaultVoice(v *IAudioServer, index int, property *types.RawVoiceProperty) error {
+func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoiceProperty) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 
