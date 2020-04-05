@@ -48,18 +48,31 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commands := make([]types.Command, len(req.Commands))
+	commands := []types.Command{}
 
-	for i, v := range req.Commands {
-		commands[i].Type = v.Type
-
+	for _, v := range req.Commands {
 		switch v.Type {
 		case 1:
-			commands[i].SFXIndex = v.Value.(int16)
+			if value, ok := v.Value.(float64); ok {
+				commands = append(commands, types.Command{
+					Type:     v.Type,
+					SFXIndex: int16(value),
+				})
+			}
 		case 2:
-			commands[i].WaitDuration = v.Value.(float64)
+			if value, ok := v.Value.(float64); ok {
+				commands = append(commands, types.Command{
+					Type:         v.Type,
+					WaitDuration: value,
+				})
+			}
 		case 3, 4:
-			commands[i].TextToSpeech = v.Value.(string)
+			if value, ok := v.Value.(string); ok {
+				commands = append(commands, types.Command{
+					Type:         v.Type,
+					TextToSpeech: value,
+				})
+			}
 		}
 	}
 	if err := core.Push(req.IsForcePush, commands); err != nil {
