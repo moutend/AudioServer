@@ -60,12 +60,7 @@ func Push(isForcePush bool, commands []types.Command) error {
 	return nil
 }
 
-func SetDefaultVoiceProperty(property *types.VoiceProperty) error {
-	index, err := server.GetDefaultVoice()
-
-	if err != nil {
-		return err
-	}
+func SetVoiceProperty(index int32, property *types.VoiceProperty) error {
 	if err := server.SetVoiceProperty(index, property); err != nil {
 		return err
 	}
@@ -83,20 +78,22 @@ func GetVoiceCount() (int32, error) {
 	return count, nil
 }
 
-func GetDefaultVoiceProperty() (*types.VoiceProperty, error) {
+func GetDefaultVoice() (int32, error) {
 	index, err := server.GetDefaultVoice()
 
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
 
+	return index, nil
+}
+
+func GetVoiceProperty(index int32) (*types.VoiceProperty, error) {
 	property, err := server.GetVoiceProperty(index)
 
 	if err != nil {
 		return nil, err
 	}
-
-	property.Id = index
 
 	return property, nil
 }

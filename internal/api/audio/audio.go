@@ -3,7 +3,6 @@ package audio
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -26,13 +25,15 @@ type Command struct {
 func postAudio(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
+	w.Header().Set("Content-Type", "application/json")
+
 	buffer := &bytes.Buffer{}
 
 	if _, err := io.Copy(buffer, r.Body); err != nil {
-		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+		response := "{\"error\": \"internal error\"}"
 
 		log.Println(err)
-		http.Error(w, response, http.StatusBadRequest)
+		http.Error(w, response, http.StatusInternalServerError)
 
 		return
 	}
@@ -40,10 +41,10 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 	var req PostAudioReq
 
 	if err := json.Unmarshal(buffer.Bytes(), &req); err != nil {
-		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+		response := "{\"error\": \"%s\"}"
 
 		log.Println(err)
-		http.Error(w, response, http.StatusBadRequest)
+		http.Error(w, response, http.StatusInternalServerError)
 
 		return
 	}
@@ -76,26 +77,40 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err := core.Push(req.IsForcePush, commands); err != nil {
-		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+		response := "{\"error\": \"internal error\"}"
 
 		log.Println(err)
-		http.Error(w, response, http.StatusBadRequest)
+		http.Error(w, response, http.StatusInternalServerError)
 
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-
 	if _, err := io.WriteString(w, `{"success": true}`); err != nil {
+		response := "{\"error\": \"internal error\"}"
+
 		log.Println(err)
+		http.Error(w, response, http.StatusInternalServerError)
+
+		return
 	}
 }
 
 func postAudioRestart(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
+	w.Header().Set("Content-Type", "application/json")
+
 	if err := core.FadeIn(); err != nil {
-		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+		response := "{\"error\": \"internal error\"}"
+
+		log.Println(err)
+		http.Error(w, response, http.StatusInternalServerError)
+
+		return
+	}
+	if _, err := io.WriteString(w, `{"success": true}`); err != nil {
+		response := "{\"error\": \"internal error\"}"
+
+		log.Println(err)
 		http.Error(w, response, http.StatusInternalServerError)
 
 		return
@@ -105,8 +120,20 @@ func postAudioRestart(w http.ResponseWriter, r *http.Request) {
 func postAudioPause(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
+	w.Header().Set("Content-Type", "application/json")
+
 	if err := core.FadeOut(); err != nil {
-		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+		response := "{\"error\": \"internal error\"}"
+
+		log.Println(err)
+		http.Error(w, response, http.StatusInternalServerError)
+
+		return
+	}
+	if _, err := io.WriteString(w, `{"success": true}`); err != nil {
+		response := "{\"error\": \"internal error\"}"
+
+		log.Println(err)
 		http.Error(w, response, http.StatusInternalServerError)
 
 		return

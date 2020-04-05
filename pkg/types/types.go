@@ -15,12 +15,11 @@ type RawCommand struct {
 }
 
 type VoiceProperty struct {
-	Id           int32   `json:"id"`
-	Language     string  `json:"language"`
-	DisplayName  string  `json:"displayName"`
-	SpeakingRate float64 `json:"speakingRate"`
-	Volume       float64 `json:"volume"`
-	Pitch        float64 `json:"pitch"`
+	Language     string
+	DisplayName  string
+	SpeakingRate float64
+	Volume       float64
+	Pitch        float64
 }
 
 type RawVoiceProperty struct {
