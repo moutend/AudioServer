@@ -44,7 +44,7 @@ func asStop(v *IAudioServer) error {
 func asFadeIn(v *IAudioServer) error {
 	hr, _, _ := syscall.Syscall(
 		v.VTable().FadeIn,
-		0,
+		1,
 		uintptr(unsafe.Pointer(v)),
 		0,
 		0)
@@ -59,7 +59,7 @@ func asFadeIn(v *IAudioServer) error {
 func asFadeOut(v *IAudioServer) error {
 	hr, _, _ := syscall.Syscall(
 		v.VTable().FadeOut,
-		0,
+		1,
 		uintptr(unsafe.Pointer(v)),
 		0,
 		0)
