@@ -244,15 +244,6 @@ func putVoiceProperty(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if property.SpeakingRate != req.SpeakingRate {
-		property.SpeakingRate = req.SpeakingRate
-	}
-	if property.Pitch != req.Pitch {
-		property.Pitch = req.Pitch
-	}
-	if property.Volume != req.Volume {
-		property.Volume = req.Volume
-	}
 	if err := core.SetVoiceProperty(int32(index), property); err != nil {
 		response := "{\"error\": \"internal error\"}"
 
@@ -261,4 +252,13 @@ func putVoiceProperty(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+	if _, err := io.WriteString(w, `{"success": true}`); err != nil {
+		response := "{\"error\": \"internal error\"}"
+
+		log.Println(err)
+		http.Error(w, response, http.StatusInternalServerError)
+
+		return
+	}
+
 }
