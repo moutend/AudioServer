@@ -1,8 +1,18 @@
 package app
 
 import (
+	"encoding/hex"
+	"fmt"
+	"log"
+	"math/rand"
 	"net/http"
+	"os"
+	"os/user"
+	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/moutend/AudioServer/internal/util"
 
 	"github.com/go-chi/chi"
 	"github.com/moutend/AudioServer/internal/api"
@@ -36,7 +46,30 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 		address = a
 	}
 
-	cmd.Printf("Listening on %s\n", address)
+	u, err := user.Current()
+
+	if err != nil {
+		return err
+	}
+
+	rand.Seed(time.Now().Unix())
+	p := make([]byte, 16)
+
+	if _, err := rand.Read(p); err != nil {
+		return err
+	}
+
+	fileName := fmt.Sprintf("AudioServer-%s.txt", hex.EncodeToString(p))
+	outputPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SystemLog", fileName)
+	os.MkdirAll(filepath.Dir(outputPath), 0755)
+
+	output := util.NewBackgroundWriter(outputPath)
+	defer output.Close()
+
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Llongfile)
+	log.SetOutput(output)
+
+	log.Printf("Listening on %s\n", address)
 
 	return http.ListenAndServe(address, router)
 }
