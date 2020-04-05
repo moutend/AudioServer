@@ -71,7 +71,7 @@ func asFadeOut(v *IAudioServer) error {
 	return nil
 }
 
-func asPush(v *IAudioServer, commands []types.Command) error {
+func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 	cs := make([]types.RawCommand, len(commands), len(commands))
 	ps := make([]uintptr, len(commands), len(commands))
 
@@ -94,13 +94,18 @@ func asPush(v *IAudioServer, commands []types.Command) error {
 		}
 	}
 
+	isForcePushFlag := uintptr(0)
+
+	if isForcePush {
+		isForcePushFlag = 1
+	}
 	hr, _, _ := syscall.Syscall6(
 		v.VTable().Push,
 		4,
 		uintptr(unsafe.Pointer(v)),
 		uintptr(unsafe.Pointer(&ps[0])),
 		uintptr(len(commands)),
-		1,
+		uintptr(isForcePushFlag),
 		0,
 		0)
 

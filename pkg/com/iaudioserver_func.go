@@ -23,7 +23,7 @@ func asFadeOut(v *IAudioServer) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 
-func asPush(v *IAudioServer, commands []types.Command) error {
+func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 

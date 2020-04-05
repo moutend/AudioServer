@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moutend/AudioServer/internal/core"
 	"github.com/moutend/AudioServer/internal/util"
 
 	"github.com/go-chi/chi"
@@ -36,6 +37,11 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
+	if err := core.Setup(); err != nil {
+		return err
+	}
+
+	defer core.Teardown()
 
 	router := chi.NewRouter()
 	api.Setup(router)

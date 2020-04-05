@@ -1,6 +1,8 @@
 package core
 
 import (
+	"log"
+
 	"github.com/go-ole/go-ole"
 	"github.com/moutend/AudioServer/pkg/com"
 	"github.com/moutend/AudioServer/pkg/types"
@@ -27,6 +29,8 @@ func Setup() error {
 
 	isRunning = true
 
+	log.Println("core: Setup() is done")
+
 	return nil
 }
 
@@ -38,16 +42,20 @@ func Teardown() error {
 
 	isRunning = false
 
+	log.Println("core: Teardown() is done")
+
 	return nil
 }
 
-func Push(commands []types.Command) error {
+func Push(isForcePush bool, commands []types.Command) error {
 	if len(commands) == 0 {
 		return nil
 	}
-	if err := server.Push(commands); err != nil {
+	if err := server.Push(isForcePush, commands); err != nil {
 		return err
 	}
+
+	log.Println("core: Push() is done")
 
 	return nil
 }

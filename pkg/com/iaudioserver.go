@@ -46,8 +46,8 @@ func (v *IAudioServer) FadeOut() error {
 	return asFadeOut(v)
 }
 
-func (v *IAudioServer) Push(commands []types.Command) error {
-	return asPush(v, commands)
+func (v *IAudioServer) Push(isForcePush bool, commands []types.Command) error {
+	return asPush(v, isForcePush, commands)
 }
 
 func (v *IAudioServer) GetVoiceCount() (int, error) {
