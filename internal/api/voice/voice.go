@@ -12,8 +12,23 @@ import (
 	"github.com/moutend/AudioServer/pkg/types"
 )
 
+type GetDefaultVoicePropertyRes struct {
+	Count                int32                `json:"count"`
+	DefaultVoiceProperty *types.VoiceProperty `json:"defaultVoiceProperty"`
+}
+
 func getDefaultVoice(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
+
+	count, err := core.GetVoiceCount()
+
+	if err != nil {
+		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
+
+		log.Println(err)
+		http.Error(w, response, http.StatusBadRequest)
+
+	}
 
 	property, err := core.GetDefaultVoiceProperty()
 
@@ -23,10 +38,12 @@ func getDefaultVoice(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		http.Error(w, response, http.StatusBadRequest)
 
-		return
 	}
 
-	data, err := json.Marshal(property)
+	data, err := json.Marshal(GetDefaultVoicePropertyRes{
+		Count:                count,
+		DefaultVoiceProperty: property,
+	})
 
 	if err != nil {
 		response := fmt.Sprintf("{\"error\": \"%s\"}", err)

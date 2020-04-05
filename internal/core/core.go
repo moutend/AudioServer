@@ -73,6 +73,16 @@ func SetDefaultVoiceProperty(property *types.VoiceProperty) error {
 	return nil
 }
 
+func GetVoiceCount() (int32, error) {
+	count, err := server.GetVoiceCount()
+
+	if err != nil {
+		return -1, err
+	}
+
+	return count, nil
+}
+
 func GetDefaultVoiceProperty() (*types.VoiceProperty, error) {
 	index, err := server.GetDefaultVoice()
 
