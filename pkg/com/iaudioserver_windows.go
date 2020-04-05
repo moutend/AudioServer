@@ -116,8 +116,8 @@ func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 	return nil
 }
 
-func asGetVoiceCount(v *IAudioServer) (int, error) {
-	count := int32(0)
+func asGetVoiceCount(v *IAudioServer) (int32, error) {
+	var count int32
 
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetVoiceCount,
@@ -130,11 +130,11 @@ func asGetVoiceCount(v *IAudioServer) (int, error) {
 		return -1, ole.NewError(hr)
 	}
 
-	return int(count), nil
+	return count, nil
 }
 
-func asGetDefaultVoice(v *IAudioServer) (int, error) {
-	index := int32(0)
+func asGetDefaultVoice(v *IAudioServer) (int32, error) {
+	var index int32
 
 	hr, _, _ := syscall.Syscall(
 		v.VTable().GetDefaultVoice,
@@ -147,10 +147,10 @@ func asGetDefaultVoice(v *IAudioServer) (int, error) {
 		return -1, ole.NewError(hr)
 	}
 
-	return int(index), nil
+	return index, nil
 }
 
-func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
+func asGetVoiceProperty(v *IAudioServer, index int32) (*types.VoiceProperty, error) {
 	var property *types.RawVoiceProperty
 
 	hr, _, _ := syscall.Syscall(
@@ -165,18 +165,21 @@ func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error
 	}
 
 	result := &types.VoiceProperty{
-		RawVoiceProperty: property,
-		Language:         LPWSTRToString(property.Language),
-		DisplayName:      LPWSTRToString(property.DisplayName),
-		SpeakingRate:     property.SpeakingRate,
-		Volume:           property.Volume,
-		Pitch:            property.Pitch,
+		Language:     LPWSTRToString(property.Language),
+		DisplayName:  LPWSTRToString(property.DisplayName),
+		SpeakingRate: property.SpeakingRate,
+		Volume:       property.Volume,
+		Pitch:        property.Pitch,
 	}
+
+	ole.CoTaskMemFree(property.Language)
+	ole.CoTaskMemFree(property.DisplayName)
+	ole.CoTaskMemFree(uintptr(unsafe.Pointer(&property)))
 
 	return result, nil
 }
 
-func asSetDefaultVoice(v *IAudioServer, index int) error {
+func asSetDefaultVoice(v *IAudioServer, index int32) error {
 	hr, _, _ := syscall.Syscall(
 		v.VTable().SetDefaultVoice,
 		2,
@@ -191,7 +194,7 @@ func asSetDefaultVoice(v *IAudioServer, index int) error {
 	return nil
 }
 
-func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoiceProperty) error {
+func asSetVoiceProperty(v *IAudioServer, index int32, property *types.VoiceProperty) error {
 	p := types.RawVoiceProperty{
 		SpeakingRate: property.SpeakingRate,
 		Pitch:        property.Pitch,

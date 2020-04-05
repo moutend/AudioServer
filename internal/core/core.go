@@ -86,6 +86,8 @@ func GetDefaultVoiceProperty() (*types.VoiceProperty, error) {
 		return nil, err
 	}
 
+	property.Id = index
+
 	return property, nil
 }
 

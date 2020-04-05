@@ -27,23 +27,23 @@ func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 
-func asGetVoiceCount(v *IAudioServer) (int, error) {
+func asGetVoiceCount(v *IAudioServer) (int32, error) {
 	return -1, ole.NewError(ole.E_NOTIMPL)
 }
 
-func asGetDefaultVoice(v *IAudioServer) (int, error) {
+func asGetDefaultVoice(v *IAudioServer) (int32, error) {
 	return -1, ole.NewError(ole.E_NOTIMPL)
 }
 
-func asGetVoiceProperty(v *IAudioServer, index int) (*types.VoiceProperty, error) {
+func asGetVoiceProperty(v *IAudioServer, index int32) (*types.VoiceProperty, error) {
 	return nil, ole.NewError(ole.E_NOTIMPL)
 }
 
-func asSetDefaultVoice(v *IAudioServer, index int) error {
+func asSetDefaultVoice(v *IAudioServer, index int32) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 
-func asSetVoiceProperty(v *IAudioServer, index int, property *types.VoiceProperty) error {
+func asSetVoiceProperty(v *IAudioServer, index int32, property *types.VoiceProperty) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 

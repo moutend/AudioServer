@@ -50,23 +50,23 @@ func (v *IAudioServer) Push(isForcePush bool, commands []types.Command) error {
 	return asPush(v, isForcePush, commands)
 }
 
-func (v *IAudioServer) GetVoiceCount() (int, error) {
+func (v *IAudioServer) GetVoiceCount() (int32, error) {
 	return asGetVoiceCount(v)
 }
 
-func (v *IAudioServer) GetDefaultVoice() (int, error) {
+func (v *IAudioServer) GetDefaultVoice() (int32, error) {
 	return asGetDefaultVoice(v)
 }
 
-func (v *IAudioServer) GetVoiceProperty(index int) (*types.VoiceProperty, error) {
+func (v *IAudioServer) GetVoiceProperty(index int32) (*types.VoiceProperty, error) {
 	return asGetVoiceProperty(v, index)
 }
 
-func (v *IAudioServer) SetDefaultVoice(index int) error {
+func (v *IAudioServer) SetDefaultVoice(index int32) error {
 	return asSetDefaultVoice(v, index)
 }
 
-func (v *IAudioServer) SetVoiceProperty(index int, property *types.VoiceProperty) error {
+func (v *IAudioServer) SetVoiceProperty(index int32, property *types.VoiceProperty) error {
 	return asSetVoiceProperty(v, index, property)
 }
 
