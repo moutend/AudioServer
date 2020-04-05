@@ -172,11 +172,10 @@ func asGetVoiceProperty(v *IAudioServer, index int32) (*types.VoiceProperty, err
 		Pitch:        property.Pitch,
 	}
 
-	/*
-		ole.CoTaskMemFree(property.Language)
-		ole.CoTaskMemFree(property.DisplayName)
-		ole.CoTaskMemFree(uintptr(unsafe.Pointer(&property)))
-	*/
+	ole.CoTaskMemFree(property.Language)
+	ole.CoTaskMemFree(property.DisplayName)
+	ole.CoTaskMemFree(uintptr(unsafe.Pointer(property)))
+
 	return result, nil
 }
 
