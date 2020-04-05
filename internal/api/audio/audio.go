@@ -83,6 +83,9 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+
 	if _, err := io.WriteString(w, `{"success": true}`); err != nil {
 		log.Println(err)
 	}

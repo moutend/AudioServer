@@ -53,6 +53,9 @@ func getDefaultVoice(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+
 	if _, err := io.Copy(w, bytes.NewBuffer(data)); err != nil {
 		response := fmt.Sprintf("{\"error\": \"%s\"}", err)
 
