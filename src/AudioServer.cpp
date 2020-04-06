@@ -138,7 +138,8 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
                            pExcepInfo, puArgErr);
 }
 
-STDMETHODIMP CAudioServer::Start() {
+STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
+                                 LOGLEVEL level) {
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
   if (mIsActive) {
@@ -240,7 +241,8 @@ STDMETHODIMP CAudioServer::Start() {
   for (int16_t i = 0; i < mMaxWaves; i++) {
     wchar_t *filePath = new wchar_t[256]{};
 
-    HRESULT hr = StringCbPrintfW(filePath, 255, L"waves\\%03d.wav", i + 1);
+    HRESULT hr = StringCbPrintfW(filePath, 512, L"%s\\%03d.wav",
+                                 soundEffectsPath, i + 1);
 
     if (FAILED(hr)) {
       Log->Fail(L"Failed to build file path", GetCurrentThreadId(),
@@ -566,9 +568,12 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
 
   wchar_t *msg = new wchar_t[256]{};
 
-  HRESULT hr = StringCbPrintfW(
-      msg, 255, L"Called IAudioServer::Push() Read=%d,Write=%d,IsForce=%d",
-      mCommandLoopCtx->ReadIndex, mCommandLoopCtx->WriteIndex, isForcePush);
+  HRESULT hr =
+      StringCbPrintfW(msg, 512,
+                      L"Called IAudioServer::Push() "
+                      L"Read=%d,Write=%d,Length=%d,IsForce=%d,Ptr=%x",
+                      mCommandLoopCtx->ReadIndex, mCommandLoopCtx->WriteIndex,
+                      commandsLength, isForcePush, pCommands);
 
   if (FAILED(hr)) {
     return E_FAIL;
@@ -585,6 +590,12 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
 
   for (int32_t i = 0; i < commandsLength; i++) {
     int32_t offset = (base + i) % mCommandLoopCtx->MaxCommands;
+
+    wchar_t *buffer = new wchar_t[128]{};
+    StringCbPrintfW(buffer, 256, L"@@@index=%d,pointer=%x", i, pCommands[i]);
+    Log->Info(buffer, GetCurrentThreadId(), __LONGFILE__);
+    delete[] buffer;
+    buffer = nullptr;
 
     mCommandLoopCtx->Commands[offset]->Type = pCommands[i]->Type;
 
@@ -724,11 +735,25 @@ CAudioServer::SetVoiceProperty(INT32 index,
       mVoiceInfoCtx->VoiceProperties == nullptr) {
     return E_FAIL;
   }
+  {
+    wchar_t *buffer = new wchar_t[256]{};
+    HRESULT hr =
+        StringCbPrintfW(buffer, 512,
+                        L"Called IAudioServer::SetVoiceProperty() "
+                        L"index=%d,speakingRate=%.1f,pitch=%.1f,volume=%.1f",
+                        index, pRawVoiceProperty->SpeakingRate,
+                        pRawVoiceProperty->Pitch, pRawVoiceProperty->Volume);
 
-  Log->Info(L"Called IAudioServer::SetVoiceProperty", GetCurrentThreadId(),
-            __LONGFILE__);
+    if (FAILED(hr)) {
+      return hr;
+    }
 
-  if (pRawVoiceProperty->SpeakingRate >= 0.0) {
+    Log->Info(buffer, GetCurrentThreadId(), __LONGFILE__);
+
+    delete[] buffer;
+    buffer = nullptr;
+  }
+  {
     double rate = pRawVoiceProperty->SpeakingRate;
 
     if (rate < 0.5) {
@@ -740,7 +765,7 @@ CAudioServer::SetVoiceProperty(INT32 index,
 
     mVoiceInfoCtx->VoiceProperties[index]->SpeakingRate = rate;
   }
-  if (pRawVoiceProperty->Pitch >= 0.0) {
+  {
     double pitch = pRawVoiceProperty->Pitch;
 
     if (pitch > 2.0) {
@@ -749,7 +774,7 @@ CAudioServer::SetVoiceProperty(INT32 index,
 
     mVoiceInfoCtx->VoiceProperties[index]->AudioPitch = pitch;
   }
-  if (pRawVoiceProperty->Volume >= 0.0) {
+  {
     double volume = pRawVoiceProperty->Volume;
 
     if (volume > 1.0) {

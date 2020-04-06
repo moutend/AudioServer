@@ -30,8 +30,8 @@ func (v *IAudioServer) VTable() *IAudioServerVtbl {
 	return (*IAudioServerVtbl)(unsafe.Pointer(v.RawVTable))
 }
 
-func (v *IAudioServer) Start() error {
-	return asStart(v)
+func (v *IAudioServer) Start(soundEffectsPath, loggerURL string, logLevel int) error {
+	return asStart(v, soundEffectsPath, loggerURL, logLevel)
 }
 
 func (v *IAudioServer) Stop() error {

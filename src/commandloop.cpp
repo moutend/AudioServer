@@ -33,6 +33,8 @@ DWORD WINAPI commandLoop(LPVOID context) {
       continue;
     }
     if (ctx->ReadIndex == ctx->WriteIndex) {
+      Log->Info(L"Processed all commands, entering idle state.",
+                GetCurrentThreadId(), __LONGFILE__);
       ctx->IsIdle = true;
 
       if (ctx->NotifyIdleState != nullptr) {

@@ -244,6 +244,11 @@ func putVoiceProperty(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	property.SpeakingRate = req.SpeakingRate
+	property.Pitch = req.Pitch
+	property.Volume = property.Volume
+
 	if err := core.SetVoiceProperty(int32(index), property); err != nil {
 		response := "{\"error\": \"internal error\"}"
 

@@ -31,7 +31,7 @@ public:
                       EXCEPINFO *pExcepInfo, UINT *puArgErr);
 
   // IAudioServer methods
-  STDMETHODIMP Start();
+  STDMETHODIMP Start(LPWSTR soundEffectsPath, LPWSTR loggerURL, LOGLEVEL level);
   STDMETHODIMP Stop();
   STDMETHODIMP FadeIn();
   STDMETHODIMP FadeOut();

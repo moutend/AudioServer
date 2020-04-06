@@ -3,6 +3,7 @@
 package com
 
 import (
+	"log"
 	"syscall"
 	"unsafe"
 
@@ -11,11 +12,26 @@ import (
 	"github.com/go-ole/go-ole"
 )
 
-func asStart(v *IAudioServer) error {
-	hr, _, _ := syscall.Syscall(
+func asStart(v *IAudioServer, soundEffectsPath, loggerURL string, logLevel int) error {
+	u16SoundEffectsPath, err := syscall.UTF16FromString(soundEffectsPath)
+
+	if err != nil {
+		return err
+	}
+
+	u16LoggerURL, err := syscall.UTF16FromString(loggerURL)
+
+	if err != nil {
+		return err
+	}
+
+	hr, _, _ := syscall.Syscall6(
 		v.VTable().Start,
-		1,
+		4,
 		uintptr(unsafe.Pointer(v)),
+		uintptr(unsafe.Pointer(&u16SoundEffectsPath[0])),
+		uintptr(unsafe.Pointer(&u16LoggerURL[0])),
+		uintptr(logLevel),
 		0,
 		0)
 
@@ -89,9 +105,8 @@ func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 			}
 
 			cs[i].TextToSpeech = uintptr(unsafe.Pointer(u16ptr))
-
-			ps[i] = uintptr(unsafe.Pointer(&cs[i]))
 		}
+		ps[i] = uintptr(unsafe.Pointer(&cs[i]))
 	}
 
 	isForcePushFlag := uintptr(0)
@@ -200,7 +215,7 @@ func asSetVoiceProperty(v *IAudioServer, index int32, property *types.VoicePrope
 		Pitch:        property.Pitch,
 		Volume:       property.Volume,
 	}
-
+	log.Printf("@@@ %+v\n", p)
 	hr, _, _ := syscall.Syscall(
 		v.VTable().SetVoiceProperty,
 		3,

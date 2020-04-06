@@ -2,6 +2,8 @@ package core
 
 import (
 	"log"
+	"os/user"
+	"path/filepath"
 
 	"github.com/go-ole/go-ole"
 	"github.com/moutend/AudioServer/pkg/com"
@@ -23,7 +25,16 @@ func Setup() error {
 	if err := com.CoCreateInstance(com.CLSID_AudioServer, 0, com.CLSCTX_ALL, com.IID_IAudioServer, &server); err != nil {
 		return err
 	}
-	if err := server.Start(); err != nil {
+
+	u, err := user.Current()
+
+	if err != nil {
+		return err
+	}
+	soundEffectsPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SoundEffect")
+	loggerURL := ""
+
+	if err := server.Start(soundEffectsPath, loggerURL, 0); err != nil {
 		return err
 	}
 
