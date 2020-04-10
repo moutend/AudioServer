@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 	"time"
-	"unsafe"
 
 	"github.com/moutend/AudioServer/pkg/com"
 	"github.com/moutend/AudioServer/pkg/types"
@@ -39,7 +40,15 @@ func run(args []string) error {
 	defer audioServer.Stop()
 	defer audioServer.Release()
 
-	err := audioServer.Start()
+	u, err := user.Current()
+
+	if err != nil {
+		return err
+	}
+	soundEffectsPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SoundEffect")
+	loggerURL := ""
+
+	err = audioServer.Start(soundEffectsPath, loggerURL, 0)
 	fmt.Println("Called IAudioServer::Start", err)
 
 	err = audioServer.SetNotifyIdleStateHandler(func(v int64) int64 {
@@ -49,7 +58,11 @@ func run(args []string) error {
 	})
 	fmt.Println("Called IAudioServer::SetNotifyIdleStateHandler", err)
 
-	err = audioServer.Push([]types.Command{
+	err = audioServer.Push(true, []types.Command{
+		{
+			Type:     1,
+			SFXIndex: 7,
+		},
 		{
 			Type:         3,
 			TextToSpeech: "こんにちは、私の名前は京子です。日本語の音声をお届けします。",
@@ -71,10 +84,6 @@ func run(args []string) error {
 		return err
 	}
 
-	defer ole.CoTaskMemFree(property.RawVoiceProperty.Language)
-	defer ole.CoTaskMemFree(property.RawVoiceProperty.DisplayName)
-	defer ole.CoTaskMemFree(uintptr(unsafe.Pointer(&(property.RawVoiceProperty))))
-
 	fmt.Printf("@@@property %+v\n", property)
 
 	property.SpeakingRate += 1.0
@@ -85,7 +94,7 @@ func run(args []string) error {
 		return err
 	}
 
-	err = audioServer.Push([]types.Command{
+	err = audioServer.Push(true, []types.Command{
 		{
 			Type:         3,
 			TextToSpeech: "こんにちは、私の名前は京子です。日本語の音声をお届けします。",
