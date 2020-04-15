@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(AudioServer CXX)
+project(AudioServer)
 
 set(AUDIOSERVER_VERSION_MAJOR 0)
 set(AUDIOSERVER_VERSION_MINOR 1)
@@ -14,8 +14,8 @@ if(NOT WIN32)
 endif()
 
 # windows.winmd search path
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Windows Kits/10/UnionMetadata/10.0.17763.0\"" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/VC/vcpackages\"" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Windows Kits/10/UnionMetadata/10.0.18362.0\"" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/VC/vcpackages\"" )
 
 find_package(cpprestsdk CONFIG REQUIRED)
 
