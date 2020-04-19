@@ -67,7 +67,7 @@ func run() (err error) {
 		return err
 	}
 
-	fmt.Printf("%v %v\n", res.Status, body.Bytes())
+	fmt.Printf("%s %s\n", res.Status, body.Bytes())
 
 	return nil
 }
