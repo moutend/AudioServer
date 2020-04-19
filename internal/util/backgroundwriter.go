@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -39,6 +40,8 @@ func NewBackgroundWriter(outputPath string) *BackgroundWriter {
 		for {
 			select {
 			case p := <-dataChan:
+				os.MkdirAll(filepath.Dir(outputPath), 0755)
+
 				file, err := os.OpenFile(outputPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 
 				if err != nil {
