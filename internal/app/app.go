@@ -66,7 +66,7 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	fileName := fmt.Sprintf("AudioServer-%s.txt", hex.EncodeToString(p))
-	outputPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SystemLog", fileName)
+	outputPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Logs", "SystemLog", fileName)
 	os.MkdirAll(filepath.Dir(outputPath), 0755)
 
 	output := util.NewBackgroundWriter(outputPath)
