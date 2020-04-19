@@ -591,12 +591,6 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
   for (int32_t i = 0; i < commandsLength; i++) {
     int32_t offset = (base + i) % mCommandLoopCtx->MaxCommands;
 
-    wchar_t *buffer = new wchar_t[128]{};
-    StringCbPrintfW(buffer, 256, L"@@@index=%d,pointer=%x", i, pCommands[i]);
-    Log->Info(buffer, GetCurrentThreadId(), __LONGFILE__);
-    delete[] buffer;
-    buffer = nullptr;
-
     mCommandLoopCtx->Commands[offset]->Type = pCommands[i]->Type;
 
     switch (pCommands[i]->Type) {
