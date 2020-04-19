@@ -19,7 +19,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (err error) {
 	var (
 		pathFlag   string
 		methodFlag string
@@ -34,17 +34,21 @@ func run() error {
 	}
 
 	address := flag.Args()[0]
-
-	data, err := ioutil.ReadFile(pathFlag)
-
-	if err != nil {
-		return err
-	}
-
 	client := &http.Client{}
 
-	req, err := http.NewRequest(methodFlag, address, bytes.NewBuffer(data))
+	var req *http.Request
 
+	if pathFlag == "" {
+		req, err = http.NewRequest(methodFlag, address, nil)
+	} else {
+		data, err := ioutil.ReadFile(pathFlag)
+
+		if err != nil {
+			return err
+		}
+
+		req, err = http.NewRequest(methodFlag, address, bytes.NewBuffer(data))
+	}
 	if err != nil {
 		return err
 	}
