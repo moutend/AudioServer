@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -37,6 +36,29 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
+
+	rand.Seed(time.Now().Unix())
+	p := make([]byte, 16)
+
+	if _, err := rand.Read(p); err != nil {
+		return err
+	}
+
+	myself, err := user.Current()
+
+	if err != nil {
+		return err
+	}
+
+	fileName := fmt.Sprintf("AudioServer-%s.txt", hex.EncodeToString(p))
+	outputPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Logs", "SystemLog", fileName)
+	output := util.NewBackgroundWriter(outputPath)
+
+	defer output.Close()
+
+	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Llongfile)
+	log.SetOutput(output)
+
 	if err := core.Setup(); err != nil {
 		return err
 	}
@@ -51,29 +73,6 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	if a := viper.GetString("server.address"); a != "" {
 		address = a
 	}
-
-	u, err := user.Current()
-
-	if err != nil {
-		return err
-	}
-
-	rand.Seed(time.Now().Unix())
-	p := make([]byte, 16)
-
-	if _, err := rand.Read(p); err != nil {
-		return err
-	}
-
-	fileName := fmt.Sprintf("AudioServer-%s.txt", hex.EncodeToString(p))
-	outputPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Logs", "SystemLog", fileName)
-	os.MkdirAll(filepath.Dir(outputPath), 0755)
-
-	output := util.NewBackgroundWriter(outputPath)
-	defer output.Close()
-
-	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Llongfile)
-	log.SetOutput(output)
 
 	log.Printf("Listening on %s\n", address)
 

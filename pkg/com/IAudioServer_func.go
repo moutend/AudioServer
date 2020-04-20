@@ -7,7 +7,7 @@ import (
 	"github.com/moutend/AudioServer/pkg/types"
 )
 
-func asStart(v *IAudioServer, soundEffectsPath, loggerURL string, int logLevel) error {
+func asStart(v *IAudioServer, soundEffectsPath, loggerURL string, logLevel int) error {
 	return ole.NewError(ole.E_NOTIMPL)
 }
 

@@ -26,12 +26,12 @@ func Setup() error {
 		return err
 	}
 
-	u, err := user.Current()
+	myself, err := user.Current()
 
 	if err != nil {
 		return err
 	}
-	soundEffectsPath := filepath.Join(u.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SoundEffect")
+	soundEffectsPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SoundEffect")
 	loggerURL := ""
 
 	if err := server.Start(soundEffectsPath, loggerURL, 0); err != nil {
