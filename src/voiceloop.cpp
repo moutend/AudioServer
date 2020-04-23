@@ -110,7 +110,7 @@ DWORD WINAPI voiceLoop(LPVOID context) {
         .then([&ctx, &waveLength](IBuffer ^ buffer) {
           if (waveLength > 0) {
             char *wave = getBytes(buffer);
-            ctx->VoiceEngine->Feed(wave, waveLength);
+            ctx->VoiceEngine->Start(wave, waveLength);
           }
         })
         .then([](task<void> previous) {

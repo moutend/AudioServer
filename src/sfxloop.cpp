@@ -1,4 +1,5 @@
 #include <cpplogger/cpplogger.h>
+#include <strsafe.h>
 
 #include "context.h"
 #include "sfxloop.h"
@@ -22,20 +23,22 @@ DWORD WINAPI sfxLoop(LPVOID context) {
     HANDLE waitArray[2] = {ctx->QuitEvent, ctx->FeedEvent};
     DWORD waitResult = WaitForMultipleObjects(2, waitArray, FALSE, INFINITE);
 
-    // ctx->QuitEvent
+    // Check ctx->QuitEvent
     if (waitResult == WAIT_OBJECT_0 + 0) {
       break;
     }
-
-    bool ok{};
-
     if (ctx->SFXIndex < 0) {
-      ok = ctx->SFXEngine->Sleep(ctx->WaitDuration);
+      wchar_t *buffer = new wchar_t[128]{};
+      StringCbPrintfW(buffer, 256, L"@@@wait %.1f", ctx->WaitDuration);
+
+      Log->Info(buffer, GetCurrentThreadId(), __LONGFILE__);
+
+      delete[] buffer;
+      buffer = nullptr;
+
+      ctx->SFXEngine->Sleep(ctx->WaitDuration);
     } else {
-      ok = ctx->SFXEngine->Feed(ctx->SFXIndex);
-    }
-    if (!ok) {
-      Log->Warn(L"Failed to feed", GetCurrentThreadId(), __LONGFILE__);
+      ctx->SFXEngine->Start(ctx->SFXIndex);
     }
   }
 

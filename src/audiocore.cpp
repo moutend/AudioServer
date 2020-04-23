@@ -325,8 +325,9 @@ DWORD AudioCore::DoRenderThread() {
 
   int bytesPerSample{mMixFormat->wBitsPerSample / 8};
   bool isPlaying{true};
+  bool isSent{};
 
-  mEngine->SetTargetSamplesPerSec(mMixFormat->nSamplesPerSec);
+  mEngine->SetFormat(mMixFormat->nChannels, mMixFormat->nSamplesPerSec);
 
   while (isPlaying) {
     DWORD waitResult = WaitForMultipleObjects(3, waitArray, FALSE, INFINITE);
@@ -379,8 +380,7 @@ DWORD AudioCore::DoRenderThread() {
           static_cast<int>(availableFrames * mFrameSize) / bytesPerSample;
 
       for (int i = 0; i < samples; i++) {
-        double f64 = mEngine->Read();
-        int32_t s32 = static_cast<int32_t>(f64);
+        int32_t s32 = mEngine->Read();
 
         for (int j = 0; j < bytesPerSample; j++) {
           pData[bytesPerSample * i + bytesPerSample - 1 - j] =
@@ -389,15 +389,17 @@ DWORD AudioCore::DoRenderThread() {
 
         mEngine->Next();
 
-        if (!mEngine->IsCompleted()) {
+        if (!mEngine->IsDone()) {
+          isSent = false;
           continue;
         }
-        if (!SetEvent(mNextEvent)) {
-          Log->Fail(L"Failed to send event", GetCurrentThreadId(),
-                    __LONGFILE__);
+        if (!isSent) {
+          if (!SetEvent(mNextEvent)) {
+            Log->Fail(L"Failed to send event", GetCurrentThreadId(),
+                      __LONGFILE__);
+          }
+          isSent = true;
         }
-
-        mEngine->Reset();
       }
 
       hr = mAudioRenderClient->ReleaseBuffer(availableFrames, 0);

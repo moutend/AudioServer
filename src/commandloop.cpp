@@ -45,8 +45,8 @@ DWORD WINAPI commandLoop(LPVOID context) {
     }
     switch (waitResult) {
     case WAIT_OBJECT_0 + 1: // ctx->PushEvent
-      ctx->VoiceLoopCtx->VoiceEngine->FadeOut();
-      ctx->SFXLoopCtx->SFXEngine->FadeOut();
+      ctx->VoiceLoopCtx->VoiceEngine->Pause();
+      ctx->SFXLoopCtx->SFXEngine->Pause();
       break;
     }
 

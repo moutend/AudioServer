@@ -149,7 +149,7 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
 
   mIsActive = true;
 
-  Log = new Logger::Logger(L"AudioServer", L"v0.1.0-develop", 4096);
+  Log = new Logger::Logger(L"AudioServer", L"v0.1.0-develop", 8192);
 
   Log->Info(L"Setup audio server", GetCurrentThreadId(), __LONGFILE__);
 
@@ -173,7 +173,7 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
     return E_FAIL;
   }
 
-  mVoiceEngine = new PCMAudio::RingEngine();
+  mVoiceEngine = new PCMAudio::RingEngine(32);
 
   mNextVoiceEvent =
       CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -236,7 +236,7 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
     return E_FAIL;
   }
 
-  mSFXEngine = new PCMAudio::LauncherEngine(mMaxWaves);
+  mSFXEngine = new PCMAudio::LauncherEngine(mMaxWaves, 32);
 
   for (int16_t i = 0; i < mMaxWaves; i++) {
     wchar_t *filePath = new wchar_t[256]{};
@@ -252,10 +252,11 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
 
     std::ifstream file(filePath, std::ios::binary | std::ios::in);
 
-    if (!mSFXEngine->Register(i, file)) {
-      Log->Fail(L"Failed to register SFX", GetCurrentThreadId(), __LONGFILE__);
-      continue;
+    if (!file.is_open()) {
+      Log->Fail(L"Failed to open file", GetCurrentThreadId(), __LONGFILE__);
     }
+
+    mSFXEngine->Register(i, file);
 
     Log->Info(filePath, GetCurrentThreadId(), __LONGFILE__);
 
@@ -535,8 +536,8 @@ STDMETHODIMP CAudioServer::FadeIn() {
 
   Log->Info(L"Called FadeIn()", GetCurrentThreadId(), __LONGFILE__);
 
-  mVoiceEngine->FadeIn();
-  mSFXEngine->FadeIn();
+  mVoiceEngine->Restart();
+  mSFXEngine->Restart();
 
   return S_OK;
 }
@@ -550,8 +551,8 @@ STDMETHODIMP CAudioServer::FadeOut() {
 
   Log->Info(L"Called FadeOut()", GetCurrentThreadId(), __LONGFILE__);
 
-  mVoiceEngine->FadeOut();
-  mSFXEngine->FadeOut();
+  mVoiceEngine->Pause();
+  mSFXEngine->Pause();
 
   return S_OK;
 }
@@ -566,23 +567,23 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
     return E_FAIL;
   }
 
-  wchar_t *msg = new wchar_t[256]{};
+  wchar_t *buffer = new wchar_t[256]{};
 
   HRESULT hr =
-      StringCbPrintfW(msg, 512,
+      StringCbPrintfW(buffer, 512,
                       L"Called IAudioServer::Push() "
-                      L"Read=%d,Write=%d,Length=%d,IsForce=%d,Ptr=%x",
+                      L"Read=%d,Write=%d,Length=%d,IsForce=%d,Wait=%.1f",
                       mCommandLoopCtx->ReadIndex, mCommandLoopCtx->WriteIndex,
-                      commandsLength, isForcePush, pCommands);
+                      commandsLength, isForcePush, pCommands[0]->WaitDuration);
 
   if (FAILED(hr)) {
     return E_FAIL;
   }
 
-  Log->Info(msg, GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(buffer, GetCurrentThreadId(), __LONGFILE__);
 
-  delete[] msg;
-  msg = nullptr;
+  delete[] buffer;
+  buffer = nullptr;
 
   bool isIdle = mCommandLoopCtx->IsIdle;
   int32_t base = mCommandLoopCtx->WriteIndex;

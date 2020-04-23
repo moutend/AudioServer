@@ -1,0 +1,21 @@
+{
+  "isForcePush": true,
+  "commands": [
+    {
+      "type": 2,
+      "value": 1234.56
+    },
+    {
+      "type": 1,
+      "value": 23
+    },
+    {
+      "type": 2,
+      "value": 1234.56
+    },
+    {
+      "type": 1,
+      "value": 23
+    }
+  ]
+}
