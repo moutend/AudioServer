@@ -5,14 +5,14 @@
 #include <mutex>
 #include <windows.h>
 
-#include "audioloop.h"
-#include "commandloop.h"
+#include "audiothread.h"
+#include "commandthread.h"
 #include "context.h"
-#include "logloop.h"
-#include "sfxloop.h"
+#include "loggingthread.h"
+#include "sfxthread.h"
 #include "util.h"
 #include "voiceinfo.h"
-#include "voiceloop.h"
+#include "voicethread.h"
 
 class CAudioServer : public IAudioServer {
 public:
@@ -33,8 +33,8 @@ public:
   // IAudioServer methods
   STDMETHODIMP Start(LPWSTR soundEffectsPath, LPWSTR loggerURL, LOGLEVEL level);
   STDMETHODIMP Stop();
-  STDMETHODIMP FadeIn();
-  STDMETHODIMP FadeOut();
+  STDMETHODIMP Restart();
+  STDMETHODIMP Pause();
   STDMETHODIMP Push(RawCommand **pCommands, INT32 commandsLength,
                     INT32 isForcePush);
   STDMETHODIMP GetVoiceCount(INT32 *pVoiceCount);
@@ -57,27 +57,23 @@ private:
   bool mIsActive = false;
   std::mutex mAudioServerMutex;
 
-  LogLoopContext *mLogLoopCtx = nullptr;
-  CommandLoopContext *mCommandLoopCtx = nullptr;
+  LoggingContext *mLoggingCtx = nullptr;
+  CommandContext *mCommandCtx = nullptr;
   VoiceInfoContext *mVoiceInfoCtx = nullptr;
-  VoiceLoopContext *mVoiceLoopCtx = nullptr;
-  SFXLoopContext *mSFXLoopCtx = nullptr;
-  AudioLoopContext *mVoiceRenderCtx = nullptr;
-  AudioLoopContext *mSFXRenderCtx = nullptr;
+  VoiceContext *mVoiceCtx = nullptr;
+  SFXContext *mSFXCtx = nullptr;
+  AudioContext *mRenderCtx = nullptr;
 
-  HANDLE mLogLoopThread = nullptr;
-  HANDLE mCommandLoopThread = nullptr;
+  HANDLE mLoggingThread = nullptr;
+  HANDLE mCommandThread = nullptr;
   HANDLE mVoiceInfoThread = nullptr;
-  HANDLE mVoiceLoopThread = nullptr;
-  HANDLE mVoiceRenderThread = nullptr;
-  HANDLE mSFXLoopThread = nullptr;
-  HANDLE mSFXRenderThread = nullptr;
+  HANDLE mVoiceThread = nullptr;
+  HANDLE mSFXThread = nullptr;
+  HANDLE mRenderThread = nullptr;
 
-  HANDLE mNextVoiceEvent = nullptr;
-  HANDLE mNextSoundEvent = nullptr;
+  HANDLE mNextEvent = nullptr;
 
-  PCMAudio::RingEngine *mVoiceEngine = nullptr;
-  PCMAudio::LauncherEngine *mSFXEngine = nullptr;
+  PCMAudio::KickEngine *mEngine = nullptr;
 };
 
 class CAudioServerFactory : public IClassFactory {

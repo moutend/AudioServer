@@ -8,7 +8,7 @@
 
 #include "context.h"
 #include "util.h"
-#include "voiceloop.h"
+#include "voicethread.h"
 
 using namespace Microsoft::WRL;
 using namespace Windows::Media::SpeechSynthesis;
@@ -20,13 +20,13 @@ using Windows::Foundation::Metadata::ApiInformation;
 
 extern Logger::Logger *Log;
 
-DWORD WINAPI voiceLoop(LPVOID context) {
-  Log->Info(L"Start Voice loop thread", GetCurrentThreadId(), __LONGFILE__);
+DWORD WINAPI voiceThread(LPVOID context) {
+  Log->Info(L"Start voice thread", GetCurrentThreadId(), __LONGFILE__);
 
-  VoiceLoopContext *ctx = static_cast<VoiceLoopContext *>(context);
+  VoiceContext *ctx = static_cast<VoiceContext *>(context);
 
   if (ctx == nullptr) {
-    Log->Fail(L"Failed to obtain ctx", GetCurrentThreadId(), __LONGFILE__);
+    Log->Fail(L"Failed to get context", GetCurrentThreadId(), __LONGFILE__);
     return E_FAIL;
   }
 
@@ -36,7 +36,7 @@ DWORD WINAPI voiceLoop(LPVOID context) {
   auto synth = ref new SpeechSynthesizer();
 
   while (isActive) {
-    HANDLE waitArray[2] = {ctx->FeedEvent, ctx->QuitEvent};
+    HANDLE waitArray[2] = {ctx->QuitEvent, ctx->KickEvent};
     DWORD waitResult = WaitForMultipleObjects(2, waitArray, FALSE, INFINITE);
 
     if (ctx->VoiceInfoCtx != nullptr &&
@@ -56,11 +56,11 @@ DWORD WINAPI voiceLoop(LPVOID context) {
       synth->Options->AppendedSilence = SpeechAppendedSilence::Min;
     }
     switch (waitResult) {
-    case WAIT_OBJECT_0 + 0: // ctx->FeedEvent
-      break;
-    case WAIT_OBJECT_0 + 1: // ctx->QuitEvent
+    case WAIT_OBJECT_0 + 0: // ctx->QuitEvent
       isActive = false;
       continue;
+    case WAIT_OBJECT_0 + 1: // ctx->KickEvent
+      break;
     }
 
     task<SpeechSynthesisStream ^> speechTask;
@@ -94,7 +94,7 @@ DWORD WINAPI voiceLoop(LPVOID context) {
       }
     }
 
-    int32_t waveLength{0};
+    int32_t waveLength{};
 
     speechTask
         .then([&ctx, &waveLength](SpeechSynthesisStream ^ speechStream) {
@@ -110,7 +110,7 @@ DWORD WINAPI voiceLoop(LPVOID context) {
         .then([&ctx, &waveLength](IBuffer ^ buffer) {
           if (waveLength > 0) {
             char *wave = getBytes(buffer);
-            ctx->VoiceEngine->Start(wave, waveLength);
+            ctx->Engine->Kick(wave, waveLength);
           }
         })
         .then([](task<void> previous) {
@@ -126,7 +126,7 @@ DWORD WINAPI voiceLoop(LPVOID context) {
 
   RoUninitialize();
 
-  Log->Info(L"End Voice loop thread", GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(L"End voice thread", GetCurrentThreadId(), __LONGFILE__);
 
   return S_OK;
 }

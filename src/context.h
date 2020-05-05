@@ -6,7 +6,7 @@
 
 #include "types.h"
 
-struct LogLoopContext {
+struct LoggingContext {
   HANDLE QuitEvent = nullptr;
 };
 
@@ -27,40 +27,40 @@ struct VoiceInfoContext {
   VoiceProperty **VoiceProperties = nullptr;
 };
 
-struct VoiceLoopContext {
-  HANDLE FeedEvent = nullptr;
-  HANDLE NextEvent = nullptr;
+struct VoiceContext {
   HANDLE QuitEvent = nullptr;
+  HANDLE KickEvent = nullptr;
   bool IsSSML = false;
   wchar_t *Text = nullptr;
-  PCMAudio::RingEngine *VoiceEngine = nullptr;
   VoiceInfoContext *VoiceInfoCtx = nullptr;
+  PCMAudio::KickEngine *Engine = nullptr;
 };
 
-struct SFXLoopContext {
-  HANDLE FeedEvent = nullptr;
-  HANDLE NextEvent = nullptr;
+struct SFXContext {
   HANDLE QuitEvent = nullptr;
+  HANDLE KickEvent = nullptr;
   int16_t SFXIndex = 0;
-  double WaitDuration = 0.0;
-  PCMAudio::LauncherEngine *SFXEngine = nullptr;
+  double SleepDuration = 0.0; /* ms */
+  PCMAudio::KickEngine *Engine = nullptr;
 };
 
-struct CommandLoopContext {
-  HANDLE PushEvent = nullptr;
+struct CommandContext {
   HANDLE QuitEvent = nullptr;
-  VoiceLoopContext *VoiceLoopCtx = nullptr;
-  SFXLoopContext *SFXLoopCtx = nullptr;
+  HANDLE PushEvent = nullptr;
+  HANDLE NextEvent = nullptr;
+  VoiceContext *VoiceCtx = nullptr;
+  SFXContext *SFXCtx = nullptr;
   Command **Commands = nullptr;
   bool IsIdle = true;
   int32_t ReadIndex = 0;
   int32_t WriteIndex = 0;
   int32_t MaxCommands = 256;
   NotifyIdleStateHandler NotifyIdleState = nullptr;
+  PCMAudio::Engine *Engine = nullptr;
 };
 
-struct AudioLoopContext {
-  HANDLE NextEvent = nullptr;
+struct AudioContext {
   HANDLE QuitEvent = nullptr;
+  HANDLE NextEvent = nullptr;
   PCMAudio::Engine *Engine = nullptr;
 };

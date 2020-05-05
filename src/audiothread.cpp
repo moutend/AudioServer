@@ -2,7 +2,7 @@
 #include <roapi.h>
 
 #include "audiocore.h"
-#include "audioloop.h"
+#include "audiothread.h"
 #include "context.h"
 #include "util.h"
 
@@ -10,13 +10,13 @@ using namespace Windows::Media::Devices;
 
 extern Logger::Logger *Log;
 
-DWORD WINAPI audioLoop(LPVOID context) {
-  Log->Info(L"Start audio loop thread", GetCurrentThreadId(), __LONGFILE__);
+DWORD WINAPI audioThread(LPVOID context) {
+  Log->Info(L"Start audio thread", GetCurrentThreadId(), __LONGFILE__);
 
-  AudioLoopContext *ctx = static_cast<AudioLoopContext *>(context);
+  AudioContext *ctx = static_cast<AudioContext *>(context);
 
   if (ctx == nullptr) {
-    Log->Fail(L"Failed to obtain ctx", GetCurrentThreadId(), __LONGFILE__);
+    Log->Fail(L"Failed to get context", GetCurrentThreadId(), __LONGFILE__);
     return E_FAIL;
   }
 
@@ -94,7 +94,7 @@ DWORD WINAPI audioLoop(LPVOID context) {
 
   RoUninitialize();
 
-  Log->Info(L"End audio loop thread", GetCurrentThreadId(), __LONGFILE__);
+  Log->Info(L"End audio thread", GetCurrentThreadId(), __LONGFILE__);
 
   return S_OK;
 }

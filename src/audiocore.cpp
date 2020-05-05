@@ -352,7 +352,7 @@ DWORD AudioCore::DoRenderThread() {
       isPlaying = false;
       break;
     case WAIT_OBJECT_0 + 2: // mRenderEvent
-      BYTE *pData{nullptr};
+      BYTE *pData{};
       UINT32 padding{};
       UINT32 availableFrames{};
 

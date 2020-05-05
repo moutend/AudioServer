@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "context.h"
-#include "logloop.h"
+#include "loggingthread.h"
 #include "util.h"
 
 using namespace web;
@@ -21,8 +21,8 @@ pplx::task<http_response> postRequest(json::value postData) {
                         U("application/json"));
 }
 
-DWORD WINAPI logLoop(LPVOID context) {
-  LogLoopContext *ctx = static_cast<LogLoopContext *>(context);
+DWORD WINAPI loggingThread(LPVOID context) {
+  LoggingContext *ctx = static_cast<LoggingContext *>(context);
 
   if (ctx == nullptr) {
     return E_FAIL;
