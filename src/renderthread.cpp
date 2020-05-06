@@ -2,18 +2,18 @@
 #include <roapi.h>
 
 #include "audiocore.h"
-#include "audiothread.h"
 #include "context.h"
+#include "renderthread.h"
 #include "util.h"
 
 using namespace Windows::Media::Devices;
 
 extern Logger::Logger *Log;
 
-DWORD WINAPI audioThread(LPVOID context) {
+DWORD WINAPI renderThread(LPVOID context) {
   Log->Info(L"Start audio thread", GetCurrentThreadId(), __LONGFILE__);
 
-  AudioContext *ctx = static_cast<AudioContext *>(context);
+  RenderContext *ctx = static_cast<RenderContext *>(context);
 
   if (ctx == nullptr) {
     Log->Fail(L"Failed to get context", GetCurrentThreadId(), __LONGFILE__);

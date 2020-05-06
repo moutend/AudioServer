@@ -59,7 +59,7 @@ struct CommandContext {
   PCMAudio::Engine *Engine = nullptr;
 };
 
-struct AudioContext {
+struct RenderContext {
   HANDLE QuitEvent = nullptr;
   HANDLE NextEvent = nullptr;
   PCMAudio::Engine *Engine = nullptr;

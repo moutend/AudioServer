@@ -20,7 +20,11 @@ TCHAR AudioServerCLSIDStr[256]{};
 TCHAR LibraryIDStr[256]{};
 
 // CAudioServer
-CAudioServer::CAudioServer() : mReferenceCount(1), mTypeInfo(nullptr) {
+CAudioServer::CAudioServer()
+    : mReferenceCount{1}, mTypeInfo{}, mMaxWaves{100}, mIsActive{},
+      mLoggingCtx{}, mCommandCtx{}, mVoiceInfoCtx{}, mVoiceCtx{}, mSFXCtx{},
+      mRenderCtx{}, mLoggingThread{}, mCommandThread{}, mVoiceInfoThread{},
+      mVoiceThread{}, mSFXThread{}, mRenderThread{}, mNextEvent{}, mEngine{} {
   ITypeLib *pTypeLib{};
   HRESULT hr{};
 
@@ -211,7 +215,7 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
     file.close();
   }
 
-  mRenderCtx = new AudioContext;
+  mRenderCtx = new RenderContext;
   mRenderCtx->NextEvent = mNextEvent;
   mRenderCtx->Engine = mEngine;
 
@@ -225,7 +229,7 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
 
   Log->Info(L"Create render thread", GetCurrentThreadId(), __LONGFILE__);
 
-  mRenderThread = CreateThread(nullptr, 0, audioThread,
+  mRenderThread = CreateThread(nullptr, 0, renderThread,
                                static_cast<void *>(mRenderCtx), 0, nullptr);
 
   if (mRenderThread == nullptr) {

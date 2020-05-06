@@ -5,10 +5,10 @@
 #include <mutex>
 #include <windows.h>
 
-#include "audiothread.h"
 #include "commandthread.h"
 #include "context.h"
 #include "loggingthread.h"
+#include "renderthread.h"
 #include "sfxthread.h"
 #include "util.h"
 #include "voiceinfo.h"
@@ -53,27 +53,27 @@ private:
   LONG mReferenceCount;
   ITypeInfo *mTypeInfo;
 
-  int16_t mMaxWaves = 128;
-  bool mIsActive = false;
+  int16_t mMaxWaves;
+  bool mIsActive;
   std::mutex mAudioServerMutex;
 
-  LoggingContext *mLoggingCtx = nullptr;
-  CommandContext *mCommandCtx = nullptr;
-  VoiceInfoContext *mVoiceInfoCtx = nullptr;
-  VoiceContext *mVoiceCtx = nullptr;
-  SFXContext *mSFXCtx = nullptr;
-  AudioContext *mRenderCtx = nullptr;
+  LoggingContext *mLoggingCtx;
+  CommandContext *mCommandCtx;
+  VoiceInfoContext *mVoiceInfoCtx;
+  VoiceContext *mVoiceCtx;
+  SFXContext *mSFXCtx;
+  RenderContext *mRenderCtx;
 
-  HANDLE mLoggingThread = nullptr;
-  HANDLE mCommandThread = nullptr;
-  HANDLE mVoiceInfoThread = nullptr;
-  HANDLE mVoiceThread = nullptr;
-  HANDLE mSFXThread = nullptr;
-  HANDLE mRenderThread = nullptr;
+  HANDLE mLoggingThread;
+  HANDLE mCommandThread;
+  HANDLE mVoiceInfoThread;
+  HANDLE mVoiceThread;
+  HANDLE mSFXThread;
+  HANDLE mRenderThread;
 
-  HANDLE mNextEvent = nullptr;
+  HANDLE mNextEvent;
 
-  PCMAudio::KickEngine *mEngine = nullptr;
+  PCMAudio::KickEngine *mEngine;
 };
 
 class CAudioServerFactory : public IClassFactory {
