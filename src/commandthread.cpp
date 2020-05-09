@@ -50,6 +50,7 @@ DWORD WINAPI commandThread(LPVOID context) {
       Log->Info(L"Play SFX", GetCurrentThreadId(), __LONGFILE__);
 
       ctx->SFXCtx->SFXIndex = cmd->SFXIndex;
+      ctx->SFXCtx->Pan = cmd->Pan;
       ctx->SFXCtx->SleepDuration = 0.0;
 
       if (!SetEvent(ctx->SFXCtx->KickEvent)) {
