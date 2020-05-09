@@ -3,7 +3,8 @@
   "commands": [
     {
       "type": 1,
-      "value": 1
+      "sfxIndex": 1,
+      "pan": 0
     }
   ]
 }
