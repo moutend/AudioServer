@@ -3,35 +3,41 @@
   "commands": [
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": -10
     },
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": -5
     },
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": 0
     },
     {
       "type": 3,
-      "value": "こんにちは、私の名前は強固です。日本語の音声をお届けします。"
+      "textToSpeech": "こんにちは、私の名前は強固です。日本語の音声をお届けします。"
     },
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": 10
     },
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": 5
     },
     {
       "type": 1,
-      "value": 10
+      "sfxIndex": 10,
+      "pan": 0
     },
     {
       "type": 3,
-      "value": "こんにちは、私の名前は強固です。日本語の音声をお届けします。"
+      "textToSpeech": "こんにちは、私の名前は強固です。日本語の音声をお届けします。"
     }
   ]
 }
