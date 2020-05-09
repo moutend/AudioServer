@@ -93,9 +93,10 @@ func asPush(v *IAudioServer, isForcePush bool, commands []types.Command) error {
 
 	for i, c := range commands {
 		cs[i] = types.RawCommand{
-			Type:         c.Type,
-			SFXIndex:     c.SFXIndex,
-			WaitDuration: c.WaitDuration,
+			Type:          c.Type,
+			SFXIndex:      c.SFXIndex,
+			SleepDuration: c.SleepDuration,
+			Pan:           c.Pan,
 		}
 		if c.Type == 3 {
 			u16ptr, err := syscall.UTF16PtrFromString(c.TextToSpeech)
