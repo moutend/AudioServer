@@ -40,6 +40,7 @@ struct SFXContext {
   HANDLE QuitEvent = nullptr;
   HANDLE KickEvent = nullptr;
   int16_t SFXIndex = 0;
+  double Pan = 0.0;
   double SleepDuration = 0.0; /* ms */
   PCMAudio::KickEngine *Engine = nullptr;
 };

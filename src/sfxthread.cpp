@@ -30,7 +30,7 @@ DWORD WINAPI sfxThread(LPVOID context) {
     if (ctx->SFXIndex < 0) {
       ctx->Engine->Sleep(ctx->SleepDuration);
     } else {
-      ctx->Engine->Kick(ctx->SFXIndex);
+      ctx->Engine->Kick(ctx->SFXIndex, ctx->Pan);
     }
   }
 

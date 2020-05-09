@@ -533,6 +533,7 @@ STDMETHODIMP CAudioServer::Push(RawCommand **pCommands, INT32 commandsLength,
 
     switch (pCommands[i]->Type) {
     case 1:
+      mCommandCtx->Commands[offset]->Pan = pCommands[i]->Pan;
       mCommandCtx->Commands[offset]->SFXIndex =
           pCommands[i]->SFXIndex <= 0 ? 0 : pCommands[i]->SFXIndex - 1;
       break;

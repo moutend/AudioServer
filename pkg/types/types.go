@@ -4,14 +4,16 @@ type Command struct {
 	Type         int16   `json:"type"`
 	SFXIndex     int16   `json:"sfxIndex"`
 	TextToSpeech string  `json:"textToSpeech"`
-	WaitDuration float64 `json:"waitDuration"`
+	SleepDuration float64 `json:"waitDuration"`
+	Pan          float64 `json:"pan"`
 }
 
 type RawCommand struct {
 	Type         int16
 	SFXIndex     int16
 	TextToSpeech uintptr
-	WaitDuration float64
+	SleepDuration float64
+	Pan          float64
 }
 
 type VoiceProperty struct {

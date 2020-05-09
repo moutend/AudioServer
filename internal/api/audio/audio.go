@@ -13,13 +13,8 @@ import (
 )
 
 type PostAudioReq struct {
-	IsForcePush bool      `json:"isForcePush"`
-	Commands    []Command `json:"commands"`
-}
-
-type Command struct {
-	Type  int16       `json:"type"`
-	Value interface{} `json:"value"`
+	IsForcePush bool            `json:"isForcePush"`
+	Commands    []types.Command `json:"commands"`
 }
 
 func postAudio(w http.ResponseWriter, r *http.Request) {
@@ -48,35 +43,7 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	commands := []types.Command{}
-
-	for _, v := range req.Commands {
-		switch v.Type {
-		case 1:
-			if value, ok := v.Value.(float64); ok {
-				commands = append(commands, types.Command{
-					Type:     v.Type,
-					SFXIndex: int16(value),
-				})
-			}
-		case 2:
-			if value, ok := v.Value.(float64); ok {
-				commands = append(commands, types.Command{
-					Type:         v.Type,
-					WaitDuration: value,
-				})
-			}
-		case 3, 4:
-			if value, ok := v.Value.(string); ok {
-				commands = append(commands, types.Command{
-					Type:         v.Type,
-					TextToSpeech: value,
-				})
-			}
-		}
-	}
-	if err := core.Push(req.IsForcePush, commands); err != nil {
+	if err := core.Push(req.IsForcePush, req.Commands); err != nil {
 		response := "{\"error\": \"internal error\"}"
 
 		log.Println(err)
