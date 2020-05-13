@@ -27,6 +27,9 @@ DWORD WINAPI sfxThread(LPVOID context) {
     if (waitResult == WAIT_OBJECT_0 + 0) {
       break;
     }
+
+  Log->Info(L"Kick SFX", GetCurrentThreadId(), __LONGFILE__);
+
     if (ctx->SFXIndex < 0) {
       ctx->Engine->Sleep(ctx->SleepDuration);
     } else {
