@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/moutend/AudioServer/internal/core"
 
@@ -18,7 +19,8 @@ type PostAudioReq struct {
 }
 
 func postAudio(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL)
+	now := time.Now().UTC()
+	log.Println(r.Method, r.URL, now.Unix(), now.Nanosecond())
 
 	w.Header().Set("Content-Type", "application/json")
 
