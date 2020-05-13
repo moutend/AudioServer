@@ -1,4 +1,4 @@
-package audio
+package api
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ type PostAudioReq struct {
 	Commands    []types.Command `json:"commands"`
 }
 
-func postAudio(w http.ResponseWriter, r *http.Request) {
+func PostAudio(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -61,7 +61,7 @@ func postAudio(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postAudioRestart(w http.ResponseWriter, r *http.Request) {
+func PostAudioRestart(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -84,7 +84,7 @@ func postAudioRestart(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postAudioPause(w http.ResponseWriter, r *http.Request) {
+func PostAudioPause(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")

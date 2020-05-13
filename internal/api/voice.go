@@ -1,4 +1,4 @@
-package voice
+package api
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ type PutVoiceRequest struct {
 	Volume       float64 `json:"volume"`
 }
 
-func getVoices(w http.ResponseWriter, r *http.Request) {
+func GetVoices(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -108,7 +108,7 @@ func getVoices(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getVoiceProperty(w http.ResponseWriter, r *http.Request) {
+func GetVoiceProperty(w http.ResponseWriter, r *http.Request) {
 	log.Println("getVoiceProperty", r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -185,7 +185,7 @@ func getVoiceProperty(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func putVoiceProperty(w http.ResponseWriter, r *http.Request) {
+func PutVoiceProperty(w http.ResponseWriter, r *http.Request) {
 	log.Println("putVoiceProperty", r.Method, r.URL)
 
 	w.Header().Set("Content-Type", "application/json")

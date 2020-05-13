@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/moutend/AudioServer/internal/core"
+	"github.com/moutend/AudioServer/internal/mux"
 	"github.com/moutend/AudioServer/internal/util"
 
-	"github.com/go-chi/chi"
 	"github.com/moutend/AudioServer/internal/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -65,8 +65,12 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 
 	defer core.Teardown()
 
-	router := chi.NewRouter()
-	api.Setup(router)
+	mux := mux.New()
+
+	mux.Post(`/v1/audio`, api.PostAudio)
+	mux.Post(`/v1/audio/restart`, api.PostAudioRestart)
+	mux.Post(`/v1/audio/pause`, api.PostAudioPause)
+	mux.Get(`/v1/voices`, api.GetVoices)
 
 	address := "localhost:7902"
 
@@ -76,7 +80,7 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 
 	log.Printf("Listening on %s\n", address)
 
-	return http.ListenAndServe(address, router)
+	return http.ListenAndServe(address, mux)
 }
 
 func init() {
