@@ -17,11 +17,12 @@ type PostAudioReq struct {
 	IsForcePush bool            `json:"isForcePush"`
 	Commands    []types.Command `json:"commands"`
 }
-
+var count int
 func postAudio(w http.ResponseWriter, r *http.Request) {
+count += 1
 	now := time.Now().UTC()
-	log.Println(r.Method, r.URL, now.Unix(), now.Nanosecond())
-
+	log.Println(count, r.Method, r.URL, now.Unix(), now.Nanosecond())
+return
 	w.Header().Set("Content-Type", "application/json")
 
 	buffer := &bytes.Buffer{}
