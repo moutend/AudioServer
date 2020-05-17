@@ -1,19 +1,19 @@
 package types
 
 type Command struct {
-	Type         int16   `json:"type"`
-	SFXIndex     int16   `json:"sfxIndex"`
-	TextToSpeech string  `json:"textToSpeech"`
-	SleepDuration float64 `json:"waitDuration"`
-	Pan          float64 `json:"pan"`
+	Type          int16   `json:"type"`
+	SFXIndex      int16   `json:"sfxIndex"`
+	TextToSpeech  string  `json:"textToSpeech"`
+	SleepDuration float64 `json:"sleepDuration"`
+	Pan           float64 `json:"pan"`
 }
 
 type RawCommand struct {
-	Type         int16
-	SFXIndex     int16
-	TextToSpeech uintptr
+	Type          int16
+	SFXIndex      int16
+	TextToSpeech  uintptr
 	SleepDuration float64
-	Pan          float64
+	Pan           float64
 }
 
 type VoiceProperty struct {
