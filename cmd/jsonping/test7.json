@@ -1,0 +1,15 @@
+{
+  "isForcePush": true,
+  "commands": [
+    {
+      "type": 1,
+      "sfxIndex": 9,
+      "pan": -10
+    },
+    {
+      "type": 2,
+      "sleepDuration": 1000,
+      "pan": -10
+    }
+  ]
+}
