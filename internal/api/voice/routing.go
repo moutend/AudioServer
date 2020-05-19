@@ -6,15 +6,14 @@ func Setup(router chi.Router) {
 	router.Route("/voice", func(r chi.Router) {
 		r.Get("/", getVoices)
 
-		r.Post("/voice/pitch/up", postDefaultVoicePitchUp)
-		r.Post("/voice/pitch/down", postDefaultVoicePitchDown)
-		r.Post("/voice/rate/up", postDefaultVoiceRateUp)
-		r.Post("/voice/rate/down", postDefaultVoiceRateDown)
-		r.Post("/voice/volume/up", postDefaultVoiceVolumeUp)
-		r.Post("/voice/volume/down", postDefaultVoiceVolumeDown)
-
-		r.Get("/", getDefaultVoiceProperty)
-		r.Put("/", putDefaultVoiceProperty)
+		r.Post("/default/pitch/up", postDefaultVoicePitchUp)
+		r.Post("/default/pitch/down", postDefaultVoicePitchDown)
+		r.Post("/default/rate/up", postDefaultVoiceRateUp)
+		r.Post("/default/rate/down", postDefaultVoiceRateDown)
+		r.Post("/default/volume/up", postDefaultVoiceVolumeUp)
+		r.Post("/default/volume/down", postDefaultVoiceVolumeDown)
+		r.Get("/default", getDefaultVoiceProperty)
+		r.Put("/default", putDefaultVoiceProperty)
 
 		r.Get("/{voiceId}", getVoiceProperty)
 		r.Put("/{voiceId}", putVoiceProperty)
