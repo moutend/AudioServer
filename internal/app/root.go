@@ -2,9 +2,12 @@ package app
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os/user"
 	"path/filepath"
@@ -68,15 +71,33 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	router := chi.NewRouter()
 	api.Setup(router)
 
-	address := "localhost:7902"
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
 
-	if a := viper.GetString("server.address"); a != "" {
-		address = a
+	if err != nil {
+		return err
 	}
 
-	log.Printf("Listening on %s\n", address)
+	serverAddr := listener.Addr().(*net.TCPAddr).String()
 
-	return http.ListenAndServe(address, router)
+	serverConfig, err := json.Marshal(struct {
+		Addr string `json:"addr"`
+	}{
+		Addr: serverAddr,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	serverConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "AudioServer.json")
+
+	if err := ioutil.WriteFile(serverConfigPath, serverConfig, 0644); err != nil {
+		return err
+	}
+
+	log.Printf("Listening on %s\n", serverAddr)
+
+	return http.Serve(listener, router)
 }
 
 func init() {
