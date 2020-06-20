@@ -2,13 +2,16 @@ package app
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
+	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/moutend/AudioServer/internal/core"
@@ -17,7 +20,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/moutend/AudioServer/internal/api"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var RootCommand = &cobra.Command{
@@ -26,17 +28,6 @@ var RootCommand = &cobra.Command{
 }
 
 func rootRunE(cmd *cobra.Command, args []string) error {
-	if path, _ := cmd.Flags().GetString("config"); path != "" {
-		viper.SetConfigFile(path)
-	}
-
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-
 	rand.Seed(time.Now().Unix())
 	p := make([]byte, 16)
 
@@ -59,7 +50,21 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Llongfile)
 	log.SetOutput(output)
 
-	if err := core.Setup(); err != nil {
+	var logServerConfig struct {
+		Addr string `json:"addr"`
+	}
+
+	logServerConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "LogServer.json")
+
+	logServerConfigData, err := ioutil.ReadFile(logServerConfigPath)
+
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(logServerConfigData, &logServerConfig); err != nil {
+		return err
+	}
+	if err := core.Setup(logServerConfig.Addr); err != nil {
 		return err
 	}
 
@@ -68,17 +73,32 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	router := chi.NewRouter()
 	api.Setup(router)
 
-	address := "localhost:7902"
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
 
-	if a := viper.GetString("server.address"); a != "" {
-		address = a
+	if err != nil {
+		return err
 	}
 
-	log.Printf("Listening on %s\n", address)
+	serverAddr := listener.Addr().(*net.TCPAddr).String()
 
-	return http.ListenAndServe(address, router)
-}
+	serverConfig, err := json.Marshal(struct {
+		Addr string `json:"addr"`
+	}{
+		Addr: serverAddr,
+	})
 
-func init() {
-	RootCommand.PersistentFlags().StringP("config", "c", "", "Path to configuration file")
+	if err != nil {
+		return err
+	}
+
+	serverConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "AudioServer.json")
+	os.MkdirAll(filepath.Dir(serverConfigPath), 0755)
+
+	if err := ioutil.WriteFile(serverConfigPath, serverConfig, 0644); err != nil {
+		return err
+	}
+
+	log.Printf("Listening on %s\n", serverAddr)
+
+	return http.Serve(listener, router)
 }

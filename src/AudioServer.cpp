@@ -12,6 +12,7 @@
 #include <IAudioServer/IAudioServer.h>
 
 extern Logger::Logger *Log;
+extern wchar_t *LogServerAddr;
 
 const TCHAR ProgIDStr[] = TEXT("ScreenReaderX.AudioServer");
 LONG LockCount{};
@@ -142,7 +143,7 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
                            pExcepInfo, puArgErr);
 }
 
-STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
+STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR logServerAddr,
                                  LOGLEVEL level) {
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
@@ -152,6 +153,16 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
   }
 
   mIsActive = true;
+
+  // Assumes that the `logServerAddr` is form of "hostname:port".
+  LogServerAddr = new wchar_t[128]{};
+
+  HRESULT hr =
+      StringCbPrintfW(LogServerAddr, 256, L"http://%s/v1/log", logServerAddr);
+
+  if (FAILED(hr)) {
+    return E_FAIL;
+  }
 
   Log = new Logger::Logger(L"AudioServer", L"v0.1.0-develop", 8192);
 
