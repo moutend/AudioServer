@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/moutend/AudioServer/internal/core"
@@ -21,7 +20,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/moutend/AudioServer/internal/api"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var RootCommand = &cobra.Command{
@@ -30,17 +28,6 @@ var RootCommand = &cobra.Command{
 }
 
 func rootRunE(cmd *cobra.Command, args []string) error {
-	if path, _ := cmd.Flags().GetString("config"); path != "" {
-		viper.SetConfigFile(path)
-	}
-
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-
 	rand.Seed(time.Now().Unix())
 	p := make([]byte, 16)
 
@@ -114,8 +101,4 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	log.Printf("Listening on %s\n", serverAddr)
 
 	return http.Serve(listener, router)
-}
-
-func init() {
-	RootCommand.PersistentFlags().StringP("config", "c", "", "Path to configuration file")
 }
