@@ -143,7 +143,7 @@ STDMETHODIMP CAudioServer::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid,
                            pExcepInfo, puArgErr);
 }
 
-STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
+STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR logServerAddr,
                                  LOGLEVEL level) {
   std::lock_guard<std::mutex> lock(mAudioServerMutex);
 
