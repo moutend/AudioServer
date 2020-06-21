@@ -15,7 +15,7 @@ var (
 	server    *com.IAudioServer
 )
 
-func Setup() error {
+func Setup(logServerAddr string) error {
 	if isRunning {
 		return nil
 	}
@@ -32,9 +32,8 @@ func Setup() error {
 		return err
 	}
 	soundEffectsPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "SoundEffect")
-	loggerURL := ""
 
-	if err := server.Start(soundEffectsPath, loggerURL, 0); err != nil {
+	if err := server.Start(soundEffectsPath, logServerAddr, 0); err != nil {
 		return err
 	}
 

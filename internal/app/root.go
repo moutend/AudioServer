@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -62,7 +63,21 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Llongfile)
 	log.SetOutput(output)
 
-	if err := core.Setup(); err != nil {
+	var logServerConfig struct {
+		Addr string `json:"addr"`
+	}
+
+	logServerConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "LogServer.json")
+
+	logServerConfigData, err := ioutil.ReadFile(logServerConfigPath)
+
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(logServerConfigData, &logServerConfig); err != nil {
+		return err
+	}
+	if err := core.Setup(logServerConfig.Addr); err != nil {
 		return err
 	}
 
@@ -90,6 +105,7 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	serverConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "AudioServer.json")
+	os.MkdirAll(filepath.Dir(serverConfigPath), 0755)
 
 	if err := ioutil.WriteFile(serverConfigPath, serverConfig, 0644); err != nil {
 		return err
