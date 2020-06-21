@@ -154,10 +154,11 @@ STDMETHODIMP CAudioServer::Start(LPWSTR soundEffectsPath, LPWSTR loggerURL,
 
   mIsActive = true;
 
-  LogServerAddr = new wchar_t[64]{};
+  // Assumes that the `logServerAddr` is form of "hostname:port".
+  LogServerAddr = new wchar_t[128]{};
 
   HRESULT hr =
-      StringCbPrintfW(LogServerAddr, 128, L"http://%s/v1/log", logServerAddr);
+      StringCbPrintfW(LogServerAddr, 256, L"http://%s/v1/log", logServerAddr);
 
   if (FAILED(hr)) {
     return E_FAIL;
