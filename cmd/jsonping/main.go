@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os/user"
-	"path"
 	"path/filepath"
 )
 
@@ -25,11 +24,11 @@ func main() {
 
 func run() (err error) {
 	var (
-		pathFlag   string
-		methodFlag string
+		PayloadFlag string
+		methodFlag  string
 	)
 
-	flag.StringVar(&pathFlag, "path", "", "Path to the JSON file.")
+	flag.StringVar(&PayloadFlag, "path", "", "Path to the JSON file.")
 	flag.StringVar(&methodFlag, "method", "", "HTTP method e.g. POST")
 	flag.Parse()
 
@@ -37,7 +36,7 @@ func run() (err error) {
 		return fmt.Errorf("specify address")
 	}
 
-	address := flag.Args()[0]
+	path := flag.Args()[0]
 	client := &http.Client{}
 
 	myself, err := user.Current()
@@ -62,22 +61,22 @@ func run() (err error) {
 		return err
 	}
 
-	url := path.Join(audioServerConfig.Addr, address)
+	address := fmt.Sprintf("http://%s%s", audioServerConfig.Addr, path)
 
-	fmt.Println("Sending request to:", url)
+	fmt.Println("Sending request to:", address)
 
 	var req *http.Request
 
-	if pathFlag == "" {
+	if PayloadFlag == "" {
 		req, err = http.NewRequest(methodFlag, address, nil)
 	} else {
-		data, err := ioutil.ReadFile(pathFlag)
+		data, err := ioutil.ReadFile(PayloadFlag)
 
 		if err != nil {
 			return err
 		}
 
-		req, err = http.NewRequest(methodFlag, url, bytes.NewBuffer(data))
+		req, err = http.NewRequest(methodFlag, address, bytes.NewBuffer(data))
 	}
 	if err != nil {
 		return err
