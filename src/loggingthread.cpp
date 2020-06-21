@@ -16,7 +16,7 @@ extern Logger::Logger *Log;
 extern wchar_t *LogServerAddr;
 
 pplx::task<http_response> postRequest(json::value postData) {
-  http_client client(logServerAddr);
+  http_client client(LogServerAddr);
 
   return client.request(methods::POST, U(""), postData.serialize(),
                         U("application/json"));
