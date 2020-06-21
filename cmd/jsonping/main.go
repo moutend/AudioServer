@@ -2,12 +2,16 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/user"
+	"path"
+	"path/filepath"
 )
 
 func main() {
@@ -36,6 +40,32 @@ func run() (err error) {
 	address := flag.Args()[0]
 	client := &http.Client{}
 
+	myself, err := user.Current()
+
+	if err != nil {
+		return err
+	}
+
+	audioServerConfigPath := filepath.Join(myself.HomeDir, "AppData", "Roaming", "ScreenReaderX", "Server", "AudioServer.json")
+
+	audioServerConfigData, err := ioutil.ReadFile(audioServerConfigPath)
+
+	if err != nil {
+		return err
+	}
+
+	var audioServerConfig struct {
+		Addr string `json:"addr"`
+	}
+
+	if err := json.Unmarshal(audioServerConfigData, &audioServerConfig); err != nil {
+		return err
+	}
+
+	url := path.Join(audioServerConfig.Addr, address)
+
+	fmt.Println("Sending request to:", url)
+
 	var req *http.Request
 
 	if pathFlag == "" {
@@ -47,7 +77,7 @@ func run() (err error) {
 			return err
 		}
 
-		req, err = http.NewRequest(methodFlag, address, bytes.NewBuffer(data))
+		req, err = http.NewRequest(methodFlag, url, bytes.NewBuffer(data))
 	}
 	if err != nil {
 		return err
